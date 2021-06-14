@@ -9,9 +9,12 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "MemoryBus.h"
 
-MemoryBus::MemoryBus()
+MemoryBus::MemoryBus() : rom(nullptr)
 {
 }
 

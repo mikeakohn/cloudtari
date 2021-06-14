@@ -54,3 +54,11 @@ void M6502::dump()
   printf(" total_cycles=%d\n", total_cycles);
 }
 
+void M6502::illegal_instruction()
+{
+  // FIXME: Print the intruction.
+  printf("Illegal Instruction: 0x%02x\n", 0);
+  dump();
+  exit(-1);
+}
+

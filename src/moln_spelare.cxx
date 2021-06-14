@@ -12,9 +12,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "MemoryBus.h"
+#include "ROM.h"
+
 int main(int argc, char *argv[])
 {
-  FILE *in;
+  MemoryBus *memory_bus = new MemoryBus();
+  ROM *rom = new ROM();
 
   if (argc != 2)
   {
@@ -22,15 +26,12 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-  in = fopen(argv[1], "rb");
+  if (rom->load(argv[0]) != 0) { exit(-1); }
 
-  if (in == NULL)
-  {
-    printf("Couldn't open file %s\n", argv[1]);
-    exit(-1);
-  }
+  memory_bus->set_rom(rom);
 
-  fclose(in);
+  delete rom;
+  delete memory_bus;
 
   return 0;
 }

@@ -14,14 +14,19 @@
 
 #include <stdint.h>
 
+#include "MemoryBus.h"
+
 class M6502
 {
 public:
   M6502();
   ~M6502();
 
+  int execute_instruction();
+
   void reset();
   void dump();
+  void illegal_instruction();
 
 private:
   int reg_a, reg_x, reg_y;
@@ -37,10 +42,12 @@ private:
     {
       value = 0;
       one = 1;
+      z = 1;
     }
 
     uint8_t value;
 
+    // FIXME: This is possibly going to have issues on big endian systems.
     struct
     {
       uint8_t c : 1;

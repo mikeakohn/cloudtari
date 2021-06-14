@@ -10,12 +10,15 @@ VPATH=../src
 OBJECTS= \
   M6502.o \
   MemoryBus.o \
+  PIA.o \
+  ROM.o \
+  TIA.o \
   Television.o \
   VNC.o
 
 default: $(OBJECTS)
 	$(CXX) -o ../moln_spelare ../src/moln_spelare.cxx \
-	  $(OBJS) \
+	  $(OBJECTS) \
 	  $(CFLAGS) $(LDFLAGS)
 
 %.o: %.cxx %.h

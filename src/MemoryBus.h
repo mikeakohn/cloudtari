@@ -12,14 +12,18 @@
 #ifndef MEMORY_BUS_H
 #define MEMORY_BUS_H
 
+#include "ROM.h"
+
 class MemoryBus
 {
 public:
   MemoryBus();
   ~MemoryBus();
 
-private:
+  void set_rom(ROM *rom) { this->rom = rom; }
 
+private:
+  ROM *rom;
 };
 
 #endif
