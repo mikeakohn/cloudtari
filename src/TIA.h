@@ -9,28 +9,22 @@
  *
  */
 
-#ifndef MEMORY_BUS_H
-#define MEMORY_BUS_H
+#ifndef TIA_H
+#define TIA_H
 
-#include "PIA.h"
-#include "ROM.h"
-#include "TIA.h"
+#include <stdint.h>
 
-class MemoryBus
+class TIA
 {
 public:
-  MemoryBus();
-  ~MemoryBus();
+  TIA();
+  ~TIA();
 
-  void set_rom(ROM *rom) { this->rom = rom; }
   void init();
   uint8_t read_memory(int address);
   void write_memory(int address, uint8_t value);
 
 private:
-  ROM *rom;
-  PIA *pia;
-  TIA *tia;
 };
 
 #endif

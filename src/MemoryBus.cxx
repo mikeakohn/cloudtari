@@ -13,12 +13,56 @@
 #include <stdlib.h>
 
 #include "MemoryBus.h"
+#include "PIA.h"
+#include "TIA.h"
 
 MemoryBus::MemoryBus() : rom(nullptr)
 {
+  tia = new TIA();
+  pia = new PIA();
 }
 
 MemoryBus::~MemoryBus()
 {
+  delete tia;
+  delete pia;
+}
+
+void MemoryBus::init()
+{
+  tia->init();
+}
+
+uint8_t MemoryBus::read_memory(int address)
+{
+  // Takes care of crappy mirrored memory.
+  if ((address & 0x1000) == 0x1000)
+  {
+    return rom->read_int8(address & 0x0fff);
+  }
+    else
+  if (address <= 0x3f)
+  {
+    return tia->read_memory(address & 0x3f);
+  }
+
+  return pia->read_memory(address);
+}
+
+void MemoryBus::write_memory(int address, uint8_t value)
+{
+  if ((address & 0x1000) == 0x1000)
+  {
+  }
+    else
+  if (address <= 0x3f)
+  { 
+    tia->write_memory(address & 0x3f, value);
+  } 
+    else
+  if ((address & 0x1000) == 0x0000)
+  { 
+    pia->write_memory(address, value);
+  }
 }
 
