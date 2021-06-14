@@ -3,6 +3,6 @@ default:
 	@+make -C build
 
 clean:
-	@rm build/*.o
+	@rm -f build/*.o moln_spelare
 	@echo "Clean!"
 

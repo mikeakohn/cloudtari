@@ -9,6 +9,11 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "M6502.h"
+
 M6502::M6502()
 {
   reset();
@@ -18,7 +23,7 @@ M6502::~M6502()
 {
 }
 
-M6502::reset()
+void M6502::reset()
 {
   reg_a = 0;
   reg_x = 0;
@@ -30,7 +35,7 @@ M6502::reset()
   total_instructions = 0;
 }
 
-M6502::dump()
+void M6502::dump()
 {
   printf("----- 6502 -----\n");
   printf(" PC=0x%04x SP=0x%04x\n", pc, sp);

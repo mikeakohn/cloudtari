@@ -9,6 +9,8 @@
  *
  */
 
+#include "VNC.h"
+
 VNC::VNC()
 {
 }

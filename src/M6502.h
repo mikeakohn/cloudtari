@@ -12,6 +12,8 @@
 #ifndef M6502_H
 #define M6502_H
 
+#include <stdint.h>
+
 class M6502
 {
 public:
@@ -31,7 +33,7 @@ private:
   {
     Status() { reset(); }
 
-    reset()
+    void reset()
     {
       value = 0;
       one = 1;

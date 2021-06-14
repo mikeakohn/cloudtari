@@ -12,7 +12,7 @@
 #ifndef VNC_H
 #define VNC_H
 
-class Television
+class VNC
 {
 public:
   VNC();
