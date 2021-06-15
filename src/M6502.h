@@ -22,17 +22,70 @@ public:
   M6502();
   ~M6502();
 
-  int execute_instruction();
-
+  void set_memory_bus(MemoryBus *memory_bus) { this->memory_bus = memory_bus; }
+  void set_debug() { debug = true; }
+  void stop() { }
   void reset();
   void dump();
-  void illegal_instruction();
+  void illegal_instruction(uint8_t opcode);
+  int execute_instruction();
 
 private:
+  int read_immediate()
+  {
+    return memory_bus->read(pc++);
+  }
+
+  int read_absolute()
+  {
+    int m = memory_bus->read16(pc);
+    pc += 2;
+    return memory_bus->read(m);
+  }
+
+  int read_absolute(int &address)
+  {
+    int m = memory_bus->read16(pc);
+    address = m;
+    pc += 2;
+    return memory_bus->read(m);
+  }
+
+  int read_zero_page()
+  {
+    int m = memory_bus->read(pc++);
+    return memory_bus->read(m);
+  }
+
+  int read_indirect_x()
+  {
+    int m;
+    m = memory_bus->read(pc++) + reg_x;
+    m = memory_bus->read16(m & 0xff);
+    return memory_bus->read(m);
+  }
+
+  void set_flags(int &data)
+  {
+    status.c = (data & 0x100) != 0;
+    data &= 0xff;
+
+    status.z = data == 0;
+    status.n = (data & 0x80) != 0;
+  }
+
+  void push(uint8_t data)
+  {
+    memory_bus->write(sp--, data);
+  }
+
+  MemoryBus *memory_bus;
+
   int reg_a, reg_x, reg_y;
   uint16_t pc, sp;
   uint32_t total_cycles;
   uint32_t total_instructions;
+  bool debug;
 
   union Status
   {
@@ -40,12 +93,12 @@ private:
 
     void reset()
     {
-      value = 0;
+      reg_p = 0;
       one = 1;
       z = 1;
     }
 
-    uint8_t value;
+    uint8_t reg_p;
 
     // FIXME: This is possibly going to have issues on big endian systems.
     struct
@@ -59,7 +112,7 @@ private:
       uint8_t v : 1;
       uint8_t n : 1;
     }; 
-  } reg_p;
+  } status;
 };
 
 #endif

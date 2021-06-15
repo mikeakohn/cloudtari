@@ -33,7 +33,7 @@ void MemoryBus::init()
   tia->init();
 }
 
-uint8_t MemoryBus::read_memory(int address)
+uint8_t MemoryBus::read(int address)
 {
   // Takes care of crappy mirrored memory.
   if ((address & 0x1000) == 0x1000)
@@ -49,7 +49,7 @@ uint8_t MemoryBus::read_memory(int address)
   return pia->read_memory(address);
 }
 
-void MemoryBus::write_memory(int address, uint8_t value)
+void MemoryBus::write(int address, uint8_t value)
 {
   if ((address & 0x1000) == 0x1000)
   {

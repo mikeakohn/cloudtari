@@ -24,8 +24,13 @@ public:
 
   void set_rom(ROM *rom) { this->rom = rom; }
   void init();
-  uint8_t read_memory(int address);
-  void write_memory(int address, uint8_t value);
+  uint8_t read(int address);
+  void write(int address, uint8_t value);
+
+  uint16_t read16(int address)
+  {
+    return read(address) | (read(address + 1) << 8);
+  }
 
 private:
   ROM *rom;
