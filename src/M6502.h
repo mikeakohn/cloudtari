@@ -53,15 +53,15 @@ private:
 
   int read_zero_page(int &address)
   {
-    address = pc;
     int m = memory_bus->read(pc++);
+    address = m;
     return memory_bus->read(m);
   }
 
   int read_absolute_x(int &address)
   {
     int m = memory_bus->read16(pc) + reg_x;
-    address = pc;
+    address = m;
     pc += 2;
     return memory_bus->read(m);
   }
@@ -69,26 +69,28 @@ private:
   int read_absolute_y(int &address)
   {
     int m = memory_bus->read16(pc) + reg_y;
-    address = pc;
+    address = m;
     pc += 2;
     return memory_bus->read(m);
   }
 
-  int read_indirect_x()
+  int read_indirect_x(int &address)
   {
     int m;
     m = memory_bus->read(pc++) + reg_x;
     m = memory_bus->read16(m & 0xff);
+    address = m;
     return memory_bus->read(m);
   }
 
   int read_indirect_y(int &address)
   {
     int m;
-    address = pc;
     m = memory_bus->read(pc++);
     m = memory_bus->read16(m) + reg_y;
-    return memory_bus->read(m & 0xffff);
+    m = m & 0xffff;
+    address = m;
+    return memory_bus->read(m);
   }
 
   int read_zero_page_x(int &address)
@@ -117,6 +119,12 @@ private:
     status.n = (data & 0x80) != 0;
   }
 
+  void set_load_flags(int &data)
+  {
+    status.z = data == 0;
+    status.n = (data & 0x80) != 0;
+  }
+
   void push(uint8_t data)
   {
     memory_bus->write(sp--, data);
@@ -136,6 +144,15 @@ private:
     status.z = reg_a == 0;
     status.n = (reg_a & 0x80) != 0;
     status.v = status.c ^ status.n;
+  }
+
+  void run_compare(int reg, int data)
+  {
+    reg = reg - data;
+
+    status.c = (reg & 0xff00) != 0;
+    status.z = reg == 0;
+    status.n = (reg & 0x80) != 0;
   }
 
   void run_and(int data)
@@ -201,6 +218,20 @@ private:
   void run_lsr_memory(int address, int data)
   {
     data = data >> 1;
+    set_flags(data);
+    memory_bus->write(address, data);
+  }
+
+  void run_inc_memory(int address, int data)
+  {
+    data++;
+    set_flags(data);
+    memory_bus->write(address, data);
+  }
+
+  void run_dec_memory(int address, int data)
+  {
+    data--;
     set_flags(data);
     memory_bus->write(address, data);
   }
