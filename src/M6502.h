@@ -146,6 +146,17 @@ private:
     status.v = status.c ^ status.n;
   }
 
+  void run_sbc(int data)
+  {
+    reg_a = reg_a - data - (status.c ^ 1);
+
+    status.c = reg_a > 0xff;
+    reg_a &= 0xff;
+    status.z = reg_a == 0;
+    status.n = (reg_a & 0x80) != 0;
+    status.v = status.c ^ status.n;
+  }
+
   void run_compare(int reg, int data)
   {
     reg = reg - data;

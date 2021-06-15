@@ -743,168 +743,54 @@ int M6502::execute_instruction()
       run_compare(reg_a, data);
       return 4;
 
-#if 0
-
     case 0xd6:     //  DEC (Zero Page, X)
-
-          M=bus.read_mem(++PC)+X;
-          if (bus.read_mem(M)==0)
-          { bus.write_mem(M,(char)255); }
-          else
-          { bus.dec_mem(M); }
-
-          Z=bus.read_mem(M);
-          N=(byte)(bus.read_mem(M)&128);
-          if (count_cycles==1) cycles=6;
-          break;
+      data = read_zero_page_x(a);
+      run_dec_memory(a, data);
+      return 6;
 
     case 0xd8:     //  CLD
-          D=0;
-          if (count_cycles==1) cycles=2;
-          break;
+      status.d = 0;
+      return 2;
 
     case 0xd9:     //  CMP (Absolute, Y)
-
-          M=bus.read_mem(++PC);
-          M=M+(bus.read_mem(++PC)<<8)+Y;
-          temp=A-bus.read_mem(M);
-          if (temp<0)
-          {
-            temp=temp+256;
-            C=1;
-          }
-          else
-          { C=0; }
-
-          Z=temp;
-          N=(byte)(temp&128);
-          if (count_cycles==1)
-          {
-            if ((M&255)!=((M-Y)&255))
-            { cycles=5; }
-            else
-            { cycles=4; }
-          }
-          break;
+      data = read_absolute_y(a);
+      run_compare(reg_a, data);
+      return same_page(a) ? 4 : 5;
 
     case 0xdd:     //  CMP (Absolute, X)
-
-          M=bus.read_mem(++PC);
-          M=M+(bus.read_mem(++PC)<<8)+X;
-          temp=A-bus.read_mem(M);
-          if (temp<0)
-          {
-            temp=temp+256;
-            C=1;
-          }
-          else
-          { C=0; }
-
-          Z=temp;
-          N=(byte)(temp&128);
-          if (count_cycles==1)
-          {
-            if ((M&255)!=((M-X)&255))
-            { cycles=5; }
-            else
-            { cycles=4; }
-          }
-          break;
+      data = read_absolute_x(a);
+      run_compare(reg_a, data);
+      return same_page(a) ? 4 : 5;
 
     case 0xde:     //  DEC (Absolute, X)
-
-          M=bus.read_mem(++PC);
-          M=M+(bus.read_mem(++PC)<<8)+X;
-          if (bus.read_mem(M)==0)
-          { bus.write_mem(M,(char)255); }
-          else
-          { bus.dec_mem(M); }
-
-          Z=bus.read_mem(M);
-          N=(byte)(bus.read_mem(M)&128);
-          if (count_cycles==1) cycles=7;
-          break;
+      data = read_absolute_x(a);
+      run_dec_memory(a, data);
+      return 7;
 
     case 0xe0:     //  CPX (Immediate)
-
-          temp=X-bus.read_mem(++PC);
-          if (temp<0)
-          {
-            temp=temp+256;
-            C=1;
-          }
-          else
-          { C=0; }
-
-          Z=temp;
-          N=(byte)(temp&128);
-          if (count_cycles==1) cycles=2;
-          break;
+      data = read_immediate();
+      run_compare(reg_x, data);
+      return 2;
 
     case 0xe1:     //  SBC ((Indirect, X))
-
-          M=bus.read_mem(++PC)+X;
-          M=bus.read_mem(M)+(bus.read_mem(M+1)<<8);
-          A=A-bus.read_mem(M)-(C^1);
-          if (A<0)
-          {
-            C=1;
-            A=A+256;
-          }
-          else
-          { C=0; }
-
-          Z=A;
-          N=(byte)(A&128);
-          V=(byte)(C^N);
-          if (count_cycles==1) cycles=6;
-          break;
+      data = read_indirect_x(a);
+      run_sbc(data);
+      return 6;
 
     case 0xe4:     //  CPX (Zero Page)
-
-          M=bus.read_mem(++PC);
-          temp=X-bus.read_mem(M);
-          if (temp<0)
-          {
-            temp=temp+256;
-            C=1;
-          }
-          else
-          { C=0; }
-
-          Z=temp;
-          N=(byte)(temp&128);
-          if (count_cycles==1) cycles=3;
-          break;
+      data = read_zero_page(a);
+      run_compare(reg_x, data);
+      return 3;
 
     case 0xe5:     //  SBC (Zero Page)
-          M=bus.read_mem(++PC);
-          A=A-bus.read_mem(M)-(C^1);
-          if (A<0)
-          {
-            C=1;
-            A=A+256;
-          }
-          else
-          { C=0; }
-
-          Z=A;
-          N=(byte)(A&128);
-          V=(byte)(C^N);
-          if (count_cycles==1) cycles=3;
-          break;
+      data = read_zero_page(a);
+      run_sbc(data);
+      return 3;
 
     case 0xe6:     //  INC (Zero Page)
-
-          M=bus.read_mem(++PC);
-          bus.inc_mem(M);
-          if (bus.read_mem(M)>255)
-          { bus.write_mem(M,(char)0); }
-
-          Z=bus.read_mem(M);
-          N=(byte)(bus.read_mem(M)&128);
-          if (count_cycles==1) cycles=5;
-          break;
+      data = read_zero_page(a);
+      run_inc_memory(a, data);
+      return 5;
 
     case 0xe8:     //  INX (Implied)
       reg_x = (reg_x + 1) & 0xff;
@@ -912,201 +798,69 @@ int M6502::execute_instruction()
       return 2;
 
     case 0xe9:     //  SBC (Immediate)
-          A=A-bus.read_mem(++PC)-(C^1);
-          if (A<0)
-          {
-            C=1;
-            A=A+256;
-          }
-          else
-          { C=0; }
-
-          Z=A;
-          N=(byte)(A&128);
-          V=(byte)(C^N);
-          if (count_cycles==1) cycles=2;
-          break;
+      data = read_immediate();
+      run_sbc(data);
+      return 2;
 
     case 0xea:     //  NOP
       return 2;
 
     case 0xec:     //  CPX (Absolute)
-
-          M=bus.read_mem(++PC);
-          M=M+(bus.read_mem(++PC)<<8);
-          temp=X-bus.read_mem(M);
-          if (temp<0)
-          {
-            temp=temp+256;
-            C=1;
-          }
-          else
-          { C=0; }
-
-          Z=temp;
-          N=(byte)(temp&128);
-          if (count_cycles==1) cycles=4;
-          break;
+      data = read_absolute(a);
+      run_compare(reg_x, data);
+      return 4;
 
     case 0xed:     //  SBC (Absolute)
-          M=bus.read_mem(++PC);
-          M=M+(bus.read_mem(++PC)<<8);
-          A=A-bus.read_mem(M)-(C^1);
-          if (A<0)
-          {
-            C=1;
-            A=A+256;
-          }
-          else
-          { C=0; }
-
-          Z=A;
-          N=(byte)(A&128);
-          V=(byte)(C^N);
-          if (count_cycles==1) cycles=4;
-          break;
+      data = read_absolute(a);
+      run_sbc(data);
+      return 4;
 
     case 0xee:     //  INC (Absolute)
-
-          M=bus.read_mem(++PC);
-          M=M+(bus.read_mem(++PC)<<8);
-          bus.inc_mem(M);
-          if (bus.read_mem(M)>255)
-          { bus.write_mem(M,(char)0); }
-
-          Z=bus.read_mem(M);
-          N=(byte)(bus.read_mem(M)&128);
-          if (count_cycles==1) cycles=6;
-          break;
+      data = read_absolute(a);
+      run_inc_memory(a, data);
+      return 6;
 
     case 0xf0:     //  BEQ
-          branch=(byte)bus.read_mem(PC+1);
+      offset = read_immediate();
+      a = pc;
 
-          if (Z==0)
-          {
-            PC=PC+branch;
-            if (count_cycles==1)
-            {
-              if ((PC&255)!=((PC-branch)&255))
-              { cycles=3; }
-              else
-              { cycles=2; }
-            }
-          }
-            else
-          if (count_cycles==1) cycles=2;
+      if (status.z == 0)
+      {
+        pc += offset;
+        return get_branch_cycles(a);
+      }
 
-          PC++;
-          break;
+      return 2;
 
     case 0xf1:     //  SBC ((Indirect), Y)
-
-          M=bus.read_mem(++PC);
-          M=bus.read_mem(M)+(bus.read_mem(M+1)<<8)+Y;
-          A=A-bus.read_mem(M)-(C^1);
-          if (A<0)
-          {
-            C=1;
-            A=A+256;
-          }
-          else
-          { C=0; }
-
-          Z=A;
-          N=(byte)(A&128);
-          V=(byte)(C^N);
-          if (count_cycles==1)
-          {
-            if ((M&255)!=((M-Y)&255))
-            { cycles=6; }
-            else
-            { cycles=5; }
-          }
-          break;
+      data = read_indirect_y(a);
+      run_sbc(data);
+      return same_page(a) ? 5 : 6;
 
     case 0xf5:     //  SBC (Zero Page, X)
-          M=bus.read_mem(++PC)+X;
-          A=A-bus.read_mem(M)-(C^1);
-          if (A<0)
-          {
-            C=1;
-            A=A+256;
-          }
-          else
-          { C=0; }
-
-          Z=A;
-          N=(byte)(A&128);
-          V=(byte)(C^N);
-          if (count_cycles==1) cycles=4;
-          break;
+      data = read_zero_page_x(a);
+      run_sbc(data);
+      return 4;
 
     case 0xf6:     //  INC (Zero Page, X)
-
-          M=bus.read_mem(++PC)+X;
-          bus.inc_mem(M);
-          if (bus.read_mem(M)>255)
-          { bus.write_mem(M,(char)0); }
-
-          Z=bus.read_mem(M);
-          N=(byte)(bus.read_mem(M)&128);
-          if (count_cycles==1) cycles=6;
-          break;
+      data = read_zero_page_x(a);
+      run_inc_memory(a, data);
+      return 6;
 
     case 0xf8:     //  SED
-          D=1;
-          if (count_cycles==1) cycles=2;
-          break;
+      status.d = 1;
+      return 2;
 
     case 0xf9:     //  SBC (Absolute, Y)
-          M=bus.read_mem(++PC);
-          M=M+(bus.read_mem(++PC)<<8)+Y;
-          A=A-bus.read_mem(M)-(C^1);
-          if (A<0)
-          {
-            C=1;
-            A=A+256;
-          }
-          else
-          { C=0; }
-
-          Z=A;
-          N=(byte)(A&128);
-          V=(byte)(C^N);
-          if (count_cycles==1)
-          {
-            if ((M&255)!=((M-Y)&255))
-            { cycles=5; }
-            else
-            { cycles=4; }
-          }
-          break;
+      data = read_absolute_y(a);
+      run_sbc(data);
+      return same_page(a) ? 4 : 5;
 
     case 0xfd:     //  SBC (Absolute, X)
-          M=bus.read_mem(++PC);
-          M=M+(bus.read_mem(++PC)<<8)+X;
-          A=A-bus.read_mem(M)-(C^1);
-          if (A<0)
-          {
-            C=1;
-            A=A+256;
-          }
-          else
-          { C=0; }
+      data = read_absolute_x(a);
+      run_sbc(data);
+      return same_page(a) ? 4 : 5;
 
-          Z=A;
-          N=(byte)(A&128);
-          V=(byte)(C^N);
-          if (count_cycles==1)
-          {
-            if ((M&255)!=((M-X)&255))
-            { cycles=5; }
-            else
-            { cycles=4; }
-          }
-          break;
-
-#endif
     case 0xfe:     //  INC (Absolute, X)
       data = read_absolute_x(a);
       run_inc_memory(a, data);
