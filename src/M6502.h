@@ -36,11 +36,11 @@ private:
     return memory_bus->read(pc++);
   }
 
-  int read_absolute()
+  int read_address()
   {
     int m = memory_bus->read16(pc);
     pc += 2;
-    return memory_bus->read(m);
+    return m;
   }
 
   int read_absolute(int &address)
@@ -51,9 +51,26 @@ private:
     return memory_bus->read(m);
   }
 
-  int read_zero_page()
+  int read_zero_page(int &address)
   {
+    address = pc;
     int m = memory_bus->read(pc++);
+    return memory_bus->read(m);
+  }
+
+  int read_absolute_x(int &address)
+  {
+    int m = memory_bus->read16(pc) + reg_x;
+    address = pc;
+    pc += 2;
+    return memory_bus->read(m);
+  }
+
+  int read_absolute_y(int &address)
+  {
+    int m = memory_bus->read16(pc) + reg_y;
+    address = pc;
+    pc += 2;
     return memory_bus->read(m);
   }
 
@@ -62,6 +79,32 @@ private:
     int m;
     m = memory_bus->read(pc++) + reg_x;
     m = memory_bus->read16(m & 0xff);
+    return memory_bus->read(m);
+  }
+
+  int read_indirect_y(int &address)
+  {
+    int m;
+    address = pc;
+    m = memory_bus->read(pc++);
+    m = memory_bus->read16(m) + reg_y;
+    return memory_bus->read(m & 0xffff);
+  }
+
+  int read_zero_page_x(int &address)
+  {
+    int m;
+    m = memory_bus->read(pc++) + reg_x;
+    m = m & 0xffff;
+    address = m;
+    return memory_bus->read(m);
+  }
+
+  int read_zero_page_y()
+  {
+    int m;
+    m = memory_bus->read(pc++) + reg_y;
+    m = m & 0xffff;
     return memory_bus->read(m);
   }
 
@@ -77,6 +120,154 @@ private:
   void push(uint8_t data)
   {
     memory_bus->write(sp--, data);
+  }
+
+  uint8_t pop()
+  {
+    return memory_bus->read(++sp);
+  }
+
+  void run_adc(int data)
+  {
+    reg_a = reg_a + data + status.c;
+
+    status.c = reg_a > 0xff;
+    reg_a &= 0xff;
+    status.z = reg_a == 0;
+    status.n = (reg_a & 0x80) != 0;
+    status.v = status.c ^ status.n;
+  }
+
+  void run_and(int data)
+  {
+    reg_a = reg_a & data;
+    set_flags(reg_a);
+  }
+
+  void run_or(int data)
+  {
+    reg_a = reg_a ^ data;
+    set_flags(reg_a);
+  }
+
+  void run_eor(int data)
+  {
+    reg_a = reg_a ^ data;
+    set_flags(reg_a);
+  }
+
+  void run_bit(int data)
+  {
+    data = data & reg_a;
+    status.z = data == 0;
+    status.n = (data & 0x80) != 0;
+    status.v = (data & 0x40) != 0;
+  }
+
+  void run_ror_memory(int address, int data)
+  {
+    status.c = data & 1;
+    data = data >> 1;
+    data |= status.c << 7;
+    status.z = data == 0;
+    status.n = (data & 0x80) != 0;
+    memory_bus->write(address, data);
+  }
+
+  void run_ror()
+  {
+    status.c = reg_a & 1;
+    reg_a = reg_a >> 1;
+    reg_a |= status.c << 7;
+    status.z = reg_a == 0;
+    status.n = (reg_a & 0x80) != 0;
+  }
+
+  void run_rol_memory(int address, int data)
+  {
+    data = data << 1;
+    set_flags(data);
+    data |= status.c;
+    memory_bus->write(address, data);
+  }
+
+  void run_asl_memory(int address, int data)
+  {
+    data = data << 1;
+    set_flags(data);
+    memory_bus->write(address, data);
+  }
+
+  void run_lsr_memory(int address, int data)
+  {
+    data = data >> 1;
+    set_flags(data);
+    memory_bus->write(address, data);
+  }
+
+  int get_branch_cycles(int address)
+  {
+    return (pc >> 8) == (address >> 8) ? 2 : 3;
+  }
+
+  void store_absolute(int data)
+  {
+    int address = memory_bus->read16(pc);
+    pc += 2;
+    memory_bus->write(address, data);
+  }
+
+  void store_absolute_x(int data)
+  {
+    int address = memory_bus->read16(pc) + reg_x;
+    pc += 2;
+    memory_bus->write(address, data);
+  }
+
+  void store_absolute_y(int data)
+  {
+    int address = memory_bus->read16(pc) + reg_y;
+    pc += 2;
+    memory_bus->write(address, data);
+  }
+
+  void store_zero_page(int data)
+  {
+    int address = memory_bus->read(pc++);
+    memory_bus->write(address, data);
+  }
+
+  void store_zero_page_x(int data)
+  {
+    int address = memory_bus->read(pc++) + reg_x;
+    memory_bus->write(address, data);
+  }
+
+  void store_zero_page_y(int data)
+  {
+    int address = memory_bus->read(pc++) + reg_x;
+    memory_bus->write(address, data);
+  }
+
+  void store_indirect_x(int data)
+  {
+    int address;
+    address = memory_bus->read(pc++) + reg_x;
+    address = memory_bus->read16(address & 0xff);
+    memory_bus->write(address, data);
+  }
+
+  void store_indirect_y(int data)
+  {
+    int address;
+    address = memory_bus->read(pc++);
+    address = memory_bus->read16(address) + reg_y;
+    memory_bus->write(address, data);
+  }
+
+  bool same_page(int address)
+  {
+    return (pc >> 8) == (address >> 8);
   }
 
   MemoryBus *memory_bus;
@@ -111,7 +302,7 @@ private:
       uint8_t one : 1;
       uint8_t v : 1;
       uint8_t n : 1;
-    }; 
+    };
   } status;
 };
 
