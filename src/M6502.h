@@ -137,24 +137,76 @@ private:
 
   void run_adc(int data)
   {
-    reg_a = reg_a + data + status.c;
+    if (status.d == 0)
+    {
+      reg_a = reg_a + data + status.c;
 
-    status.c = reg_a > 0xff;
-    reg_a &= 0xff;
-    status.z = reg_a == 0;
-    status.n = (reg_a & 0x80) != 0;
-    status.v = status.c ^ status.n;
+      status.c = reg_a > 0xff;
+      reg_a &= 0xff;
+      status.z = reg_a == 0;
+      status.n = (reg_a & 0x80) != 0;
+      status.v = status.c ^ status.n;
+    }
+      else
+    {
+      int d0 = data & 0xf;
+      int d1 = data >> 4;
+      int a0 = reg_a & 0xf;
+      int a1 = reg_a >> 4;
+
+      a0 = a0 + d0 + status.c;
+
+      if (a0 > 10)
+      {
+        a1 += a0 / 10;
+        a0 = a0 % 10;
+      }
+
+      a1 = a1 + d1;
+
+      status.c = a1 / 10 > 0;
+      a1 = a1 % 10;
+
+      reg_a = ((a1 << 4) | a0) & 0xff;
+      status.z = reg_a == 0;
+    }
   }
 
   void run_sbc(int data)
   {
-    reg_a = reg_a - data - (status.c ^ 1);
+    if (status.d == 0)
+    {
+      reg_a = reg_a - data - (status.c ^ 1);
 
-    status.c = reg_a > 0xff;
-    reg_a &= 0xff;
-    status.z = reg_a == 0;
-    status.n = (reg_a & 0x80) != 0;
-    status.v = status.c ^ status.n;
+      status.c = reg_a > 0xff;
+      reg_a &= 0xff;
+      status.z = reg_a == 0;
+      status.n = (reg_a & 0x80) != 0;
+      status.v = status.c ^ status.n;
+    }
+      else
+    {
+      int d0 = data & 0xf;
+      int d1 = data >> 4;
+      int a0 = reg_a & 0xf;
+      int a1 = reg_a >> 4;
+
+      a0 = a0 - d0 - (status.c ^ 1);
+
+      if (a0 < 0)
+      {
+        a1--;
+        a0 += 1;
+      }
+
+      a1 = a1 - d1;
+
+      status.c = a1 / 10 > 0;
+      a1 = a1 % 10;
+
+      reg_a = ((a1 << 4) | a0) & 0xff;
+      status.z = reg_a == 0;
+    }
   }
 
   void run_compare(int reg, int data)
