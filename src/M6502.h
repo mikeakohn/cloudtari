@@ -24,13 +24,16 @@ public:
 
   void set_memory_bus(MemoryBus *memory_bus) { this->memory_bus = memory_bus; }
   void set_debug() { debug = true; }
-  void stop() { }
+  void stop() { running = false; }
   void reset();
   void dump();
   void illegal_instruction(uint8_t opcode);
-  int execute_instruction();
+  bool is_running() { return running; }
+  int step();
 
 private:
+  int execute_instruction();
+
   int read_immediate()
   {
     return memory_bus->read(pc++);
@@ -365,6 +368,7 @@ private:
   }
 
   MemoryBus *memory_bus;
+  bool running;
 
   int reg_a, reg_x, reg_y;
   uint16_t pc, sp;

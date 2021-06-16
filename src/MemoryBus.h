@@ -26,6 +26,7 @@ public:
   void init();
   uint8_t read(int address);
   void write(int address, uint8_t value);
+  void dump(int start, int end);
 
   uint16_t read16(int address)
   {

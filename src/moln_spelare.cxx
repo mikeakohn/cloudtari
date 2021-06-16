@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "M6502.h"
 #include "MemoryBus.h"
@@ -28,10 +29,24 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-  if (rom->load(argv[0]) != 0) { exit(-1); }
+  if (rom->load(argv[1]) != 0) { exit(-1); }
 
   memory_bus->set_rom(rom);
   m6502->set_memory_bus(memory_bus);
+  m6502->reset();
+  m6502->set_debug();
+
+  // memory_bus->dump(0xf000, 0xffff);
+
+  while (m6502->is_running())
+  {
+    int cycles = m6502->step();
+
+    printf("  cycles=%d\n", cycles);
+    m6502->dump();
+
+    sleep(1);
+  }
 
   delete m6502;
   delete rom;

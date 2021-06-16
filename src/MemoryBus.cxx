@@ -66,3 +66,25 @@ void MemoryBus::write(int address, uint8_t value)
   }
 }
 
+void MemoryBus::dump(int start, int end)
+{
+  start &= 0xfff0;
+
+  for (int n = start; n <= end; n++)
+  {
+    if ((n % 16) == 0)
+    {
+      printf("%04x:", n);
+    }
+
+    printf(" %02x", read(n));
+
+    if ((n % 16) == 15)
+    {
+      printf("\n");
+    }
+  }
+
+  printf("\n");
+}
+

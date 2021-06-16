@@ -14,9 +14,15 @@
 
 #include "M6502.h"
 
-M6502::M6502() : debug(false)
+M6502::M6502() :
+  running(true),
+  reg_a(0),
+  reg_x(0),
+  reg_y(0),
+  total_cycles(0),
+  total_instructions(0),
+  debug(false)
 {
-  reset();
 }
 
 M6502::~M6502()
@@ -29,7 +35,7 @@ void M6502::reset()
   reg_x = 0;
   reg_y = 0;
 
-  pc = 0;
+  pc = memory_bus->read16(0xfffe);
   sp = 0xff;
   total_cycles = 0;
   total_instructions = 0;
@@ -62,6 +68,16 @@ void M6502::illegal_instruction(uint8_t opcode)
   exit(-1);
 }
 
+int M6502::step()
+{
+  int cycles = execute_instruction();
+
+  total_cycles += cycles;
+  total_instructions++;
+
+  return cycles;
+}
+
 int M6502::execute_instruction()
 {
   int address = pc++;
@@ -70,7 +86,7 @@ int M6502::execute_instruction()
   int a, data;
   int8_t offset;
 
-  if (debug) { printf("0x%04x %02x", address, opcode); }
+  if (debug) { printf("0x%04x: %02x\n", address, opcode); }
 
   switch (opcode)
   {

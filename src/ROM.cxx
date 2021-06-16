@@ -19,7 +19,7 @@
 
 #include "ROM.h"
 
-ROM::ROM()
+ROM::ROM() : size(0)
 {
   memset(memory, 0, sizeof(memory));
 }
@@ -40,6 +40,7 @@ int ROM::load(const char *filename)
     return -1;
   }
 
+  memset(&statbuf, 0, sizeof(statbuf));
   stat(filename, &statbuf);
 
   if (statbuf.st_size == 4096)
@@ -56,10 +57,11 @@ int ROM::load(const char *filename)
 
   if (len != statbuf.st_size)
   {
-    printf("Error: ROM size is not 2048 or 4096\n");
-    fclose(in);
+    printf("Error: ROM size is not 2048 or 4096 (%d / %ld)\n", len, statbuf.st_size);
     return -2;
   }
+
+  size = len;
 
   return 0;
 }

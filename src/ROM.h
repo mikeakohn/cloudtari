@@ -34,6 +34,7 @@ public:
 
 private:
   uint8_t memory[4096];
+  int size;
 };
 
 #endif
