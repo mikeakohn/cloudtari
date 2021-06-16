@@ -12,11 +12,19 @@
 #ifndef TELEVISION_H
 #define TELEVISION_H
 
+#include <stdint.h>
+
 class Television
 {
 public:
   Television();
-  ~Television();
+  virtual ~Television();
+
+  virtual int init() = 0;
+  virtual void clear_display() = 0;
+  virtual void draw_pixel(int x, int y, uint32_t color) = 0;
+  virtual bool refresh() = 0;
+  virtual int handle_events() = 0;
 
 private:
 

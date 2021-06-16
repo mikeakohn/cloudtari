@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "Disassembler.h"
 #include "M6502.h"
 
 M6502::M6502() :
@@ -86,7 +87,18 @@ int M6502::execute_instruction()
   int a, data;
   int8_t offset;
 
-  if (debug) { printf("0x%04x: %02x\n", address, opcode); }
+  if (debug)
+  {
+    char text[16];
+    uint8_t code[3];
+    code[0] = memory_bus->read(address + 0);
+    code[1] = memory_bus->read(address + 1);
+    code[2] = memory_bus->read(address + 2);
+
+    Disassembler::disassemble(code, pc, text);
+
+    printf("0x%04x: %02x - %s\n", address, opcode, text);
+  }
 
   switch (opcode)
   {

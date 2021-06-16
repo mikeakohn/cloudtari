@@ -4,16 +4,19 @@ DEBUG=-DDEBUG -g
 INCLUDES=-I..
 CFLAGS=-Wall -O3 -std=c++11 $(DEBUG) $(INCLUDES)
 #CFLAGS=-Wall $(DEBUG) $(INCLUDES)
-LDFLAGS=
+LDFLAGS=-lSDL2
 VPATH=../src
 
 OBJECTS= \
+  Disassembler.o \
   M6502.o \
   MemoryBus.o \
   PIA.o \
   ROM.o \
   TIA.o \
   Television.o \
+  TelevisionNull.o \
+  TelevisionSDL.o \
   VNC.o
 
 default: $(OBJECTS)
