@@ -30,8 +30,11 @@ public:
   virtual int handle_events();
 
 private:
-  //SDL_Surface *screen;
+  SDL_Surface *screen;
   SDL_Window *window;
+  SDL_Renderer *renderer;
+  SDL_Rect background_rect;
+  Uint32 background_color;
 
 };
 

@@ -23,11 +23,25 @@ TelevisionSDL::TelevisionSDL()
     640,
     480,
     0);
+
+  background_rect.x = 0;
+  background_rect.y = 0;
+  background_rect.w = 640;
+  background_rect.h = 480;
+
+  //renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+
+  //SDL_RenderClear(renderer);
+  screen = SDL_GetWindowSurface(window);
+
+  background_color = SDL_MapRGB(screen->format, 50, 50, 100);
+
+  clear_display();
 }
 
 TelevisionSDL::~TelevisionSDL()
 {
-  //if (screen != NULL) { SDL_FreeSurface(screen); }
+  if (screen != NULL) { SDL_FreeSurface(screen); }
   if (window != NULL) { SDL_DestroyWindow(window); }
 
   SDL_Quit();
@@ -40,6 +54,9 @@ int TelevisionSDL::init()
 
 void TelevisionSDL::clear_display()
 {
+  //SDL_RenderClear(renderer);
+  SDL_FillRect(screen, &background_rect, background_color);
+  SDL_UpdateWindowSurface(window);
 }
 
 void TelevisionSDL::draw_pixel(int x, int y, uint32_t color)
@@ -68,11 +85,8 @@ int TelevisionSDL::handle_events()
         break;
       case SDL_QUIT:
         return -1;
-        break;
+    }
   }
-
-  return 0;
-}
 
   return 0;
 }

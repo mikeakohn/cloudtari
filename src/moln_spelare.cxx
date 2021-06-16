@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
     if (television->handle_events() == -1) { break; }
 
     sleep(1);
+
+    television->clear_display();
   }
 
   delete m6502;
