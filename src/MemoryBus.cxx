@@ -35,12 +35,12 @@ void MemoryBus::init()
 
 uint8_t MemoryBus::read(int address)
 {
-  // Takes care of crappy mirrored memory.
+  // Takes care of mirrored memory.
   if ((address & 0x1000) == 0x1000)
   {
     return rom->read_int8(address & 0x0fff);
   }
-    else
+
   if (address <= 0x3f)
   {
     return tia->read_memory(address & 0x3f);

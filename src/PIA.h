@@ -23,6 +23,7 @@ public:
   void reset();
   uint8_t read_memory(int address);
   void write_memory(int address, uint8_t value);
+  void clock(int ticks);
 
 private:
   const int TIM1T = 1;
