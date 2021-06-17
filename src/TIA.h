@@ -14,6 +14,8 @@
 
 #include <stdint.h>
 
+#include "Television.h"
+
 class TIA
 {
 public:
@@ -21,25 +23,33 @@ public:
   ~TIA();
 
   void init();
+  void set_television(Television *television) { this->television = television; }
   uint8_t read_memory(int address);
   void write_memory(int address, uint8_t value);
+  void build_playfield();
   void clock();
   void clock(int ticks);
   bool draw_playfield_fg();
-  bool draw_player1();
-  bool draw_player2();
+  bool draw_player_0();
+  bool draw_player_1();
+  bool draw_missile_0();
+  bool draw_missile_1();
   bool draw_ball();
   void draw_playfield_bg();
   void draw_pixel();
+  bool wait_for_hsync() { return write_regs[WSYNC] != 0; }
 
 private:
+  Television *television;
+
   int pos_x;
   int pos_y;
-  bool wait_for_hsync;
   int pf_pixel;
+  uint64_t playfield;
 
-  uint8_t write_regs[128];
-  uint8_t read_regs[128];
+  uint8_t write_regs[64];
+  uint8_t read_regs[16];
+  uint8_t reverse[256];
 
   enum WriteAddress
   {
@@ -63,6 +73,13 @@ private:
     RESP1 = 0x11,
     RESM0 =  0x12,
     RESM1 = 0x13,
+    RESBL = 0x14,
+    AUDC0 = 0x15,
+    AUDC1 = 0x16,
+    AUDF0 = 0x17,
+    AUDF1 = 0x18,
+    AUDV0 = 0x19,
+    AUDV1 = 0x1a,
     GRP0 = 0x1b,
     GRP1 = 0x1c,
     ENAM0 = 0x1d,
