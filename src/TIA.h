@@ -25,12 +25,21 @@ public:
   void write_memory(int address, uint8_t value);
   void clock();
   void clock(int ticks);
-  void calculate_pixel();
+  bool draw_playfield_fg();
+  bool draw_player1();
+  bool draw_player2();
+  bool draw_ball();
+  void draw_playfield_bg();
+  void draw_pixel();
 
 private:
   int pos_x;
-  int wsync;
-  int pf_bit;
+  int pos_y;
+  bool wait_for_hsync;
+  int pf_pixel;
+
+  uint8_t write_regs[128];
+  uint8_t read_regs[128];
 
   enum WriteAddress
   {
