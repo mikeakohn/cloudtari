@@ -18,6 +18,7 @@
 #include "ROM.h"
 #include "TelevisionNull.h"
 #include "TelevisionSDL.h"
+#include "TIA.h"
 
 int main(int argc, char *argv[])
 {
@@ -50,6 +51,8 @@ int main(int argc, char *argv[])
   }
 
   television->init();
+
+  memory_bus->get_tia()->set_television(television);
 
   // memory_bus->dump(0xf000, 0xffff);
 

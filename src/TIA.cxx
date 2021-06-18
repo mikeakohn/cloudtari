@@ -16,6 +16,8 @@
 // Atari 2600 has:
 // 262 horizontal lines (37 vertical blank, 192 picture, 30 overscan)
 // Horizontal scanline is: 68 hsync, 160 pixels.
+// Total Resolution: 228x262
+// Visible Resolution: 160x192
 
 TIA::TIA() :
   pos_x(0),
@@ -51,6 +53,13 @@ void TIA::init()
 uint8_t TIA::read_memory(int address)
 {
   if (address > 0x0d) { return 0; }
+
+  return read_regs[address];
+}
+
+void TIA::write_memory(int address, uint8_t value)
+{
+  if (address > 0x2c) { return; }
 
   switch (address)
   {
@@ -98,22 +107,6 @@ uint8_t TIA::read_memory(int address)
       write_regs[HMM0] = 0;
       write_regs[HMM1] = 0;
       write_regs[HMBL] = 0;
-      break;
-    default:
-      return write_regs[address];
-  }
-
-  return 0;
-}
-
-void TIA::write_memory(int address, uint8_t value)
-{
-  if (address > 0x2c) { return; }
-
-  switch (address)
-  {
-    case WSYNC:
-      write_regs[WSYNC] = 1;
       break;
     default:
       write_regs[address] = value;
@@ -181,6 +174,7 @@ void TIA::clock()
 
 void TIA::clock(int ticks)
 {
+  // Every CPU cycle is 3 pixels.
   ticks = ticks * 3;
 
   //while (ticks > 0 || write_regs[WSYNC] != 0)
@@ -194,6 +188,13 @@ void TIA::clock(int ticks)
 
 bool TIA::draw_playfield_fg()
 {
+  if ((playfield & pf_pixel) != 0)
+  { 
+    television->draw_pixel(pos_x, pos_y, write_regs[COLUPF]);
+
+    return true;
+  }
+
   return false;
 }
 
@@ -224,6 +225,10 @@ bool TIA::draw_ball()
 
 void TIA::draw_playfield_bg()
 {
+  if ((playfield & pf_pixel) == 0)
+  {
+    television->draw_pixel(pos_x, pos_y, write_regs[COLUBK]);
+  }
 }
 
 void TIA::draw_pixel()

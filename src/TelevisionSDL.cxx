@@ -61,6 +61,14 @@ void TelevisionSDL::clear_display()
 
 void TelevisionSDL::draw_pixel(int x, int y, uint32_t color)
 {
+  SDL_Rect rect;
+
+  rect.x = x * 2;
+  rect.y = y * 2;
+  rect.w = 2;
+  rect.h = 2;
+
+  SDL_FillRect(screen, &rect, color);
 }
 
 bool TelevisionSDL::refresh()
@@ -86,6 +94,14 @@ int TelevisionSDL::handle_events()
       case SDL_QUIT:
         return -1;
     }
+  }
+
+  const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+
+  //if (keystate[SDLK_ESCAPE])
+  if (keystate[SDL_SCANCODE_ESCAPE])
+  {
+    return -1;
   }
 
   return 0;
