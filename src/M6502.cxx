@@ -22,6 +22,7 @@ M6502::M6502() :
   reg_y{0},
   total_cycles{0},
   total_instructions{0},
+  breakpoint{0xffff},
   debug{false}
 {
 }
@@ -97,6 +98,12 @@ int M6502::execute_instruction()
     Disassembler::disassemble(code, address, text);
 
     printf(" --- 0x%04x: %02x - %s ---\n", address, opcode, text);
+  }
+
+  if (address == breakpoint)
+  {
+    status.b = 1;
+    stop();
   }
 
   switch (opcode)
@@ -195,7 +202,7 @@ int M6502::execute_instruction()
       data = read_address();
       push(pc >> 8);
       push(pc & 0xff);
-      pc = address;
+      pc = data;
       return 6;
 
     case 0x21:     //  AND ((Indirect, X))

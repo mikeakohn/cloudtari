@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
   }
 
   if (debug) { m6502->set_debug(); }
+  //m6502->set_breakpoint(0xf45e);
 
   television->init();
 
@@ -86,6 +87,7 @@ int main(int argc, char *argv[])
       printf("  cycles=%d\n", cycles);
       m6502->dump();
       tia->dump();
+      memory_bus->dump(0x80, 0xff);
 
       if (!tia->wait_for_hsync())
       {

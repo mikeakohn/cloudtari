@@ -24,6 +24,7 @@ public:
 
   void set_memory_bus(MemoryBus *memory_bus) { this->memory_bus = memory_bus; }
   void set_debug() { debug = true; }
+  void set_breakpoint(int value) { breakpoint = value; }
   void stop() { running = false; }
   void reset();
   void dump();
@@ -375,6 +376,7 @@ private:
   uint16_t pc, sp;
   uint32_t total_cycles;
   uint32_t total_instructions;
+  int breakpoint;
   bool debug;
 
   union Status
