@@ -31,6 +31,7 @@ void PIA::reset()
   memset(riot, 0, sizeof(riot));
 
   riot[0] = 255;
+  riot[SWCHB & 0x07] = 0x03;
 
   prescale = TIM1T;
   prescale_shift = TIM1T_SHIFT;
@@ -98,7 +99,12 @@ void PIA::write_memory(int address, uint8_t value)
     return;
   }
 
-  if (address < 0x284)
+  if ((address & SWCHB) == 2)
+  {
+    return;
+  }
+
+  if (address < 0x280)
   {
     riot[address & 0x07] = value;
   }

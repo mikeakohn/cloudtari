@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
   if (debug) { m6502->set_debug(); }
   //m6502->set_breakpoint(0xf060);
-  //m6502->set_breakpoint(0xf036);
+  //m6502->set_breakpoint(0xf13d);
 
   television->init();
 
@@ -103,6 +103,12 @@ int main(int argc, char *argv[])
 
     //television->clear_display();
   }
+
+#if 0
+   m6502->dump();
+   tia->dump();
+   memory_bus->dump(0x80, 0xff);
+#endif
 
   delete m6502;
   delete rom;

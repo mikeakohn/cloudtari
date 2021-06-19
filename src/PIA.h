@@ -35,6 +35,7 @@ private:
   const int TIM64T_SHIFT = 6;
   const int T1024T_SHIFT = 10;
 
+  const int SWCHB = 0x282;
   const int INTIM = 0x284;
 
   int prescale;
