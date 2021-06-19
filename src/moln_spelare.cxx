@@ -59,7 +59,8 @@ int main(int argc, char *argv[])
   }
 
   if (debug) { m6502->set_debug(); }
-  //m6502->set_breakpoint(0xf45e);
+  //m6502->set_breakpoint(0xf060);
+  //m6502->set_breakpoint(0xf036);
 
   television->init();
 

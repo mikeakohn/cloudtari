@@ -102,7 +102,7 @@ private:
   {
     int m;
     m = memory_bus->read(pc++) + reg_x;
-    m = m & 0xffff;
+    m = m & 0xff;
     address = m;
     return memory_bus->read(m);
   }
@@ -111,7 +111,7 @@ private:
   {
     int m;
     m = memory_bus->read(pc++) + reg_y;
-    m = m & 0xffff;
+    m = m & 0xff;
     return memory_bus->read(m);
   }
 
@@ -273,6 +273,7 @@ private:
     data = data << 1;
     set_flags(data);
     data |= status.c;
+    status.z = data == 0;
     memory_bus->write(address, data);
   }
 
@@ -306,7 +307,7 @@ private:
 
   int get_branch_cycles(int address)
   {
-    return (pc >> 8) == (address >> 8) ? 2 : 3;
+    return (pc >> 8) == (address >> 8) ? 3 : 4;
   }
 
   void store_absolute(int data)

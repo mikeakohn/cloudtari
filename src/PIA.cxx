@@ -91,8 +91,9 @@ void PIA::write_memory(int address, uint8_t value)
         break;
     }
 
-    interrupt_timer = ((value + 1) * prescale) - 1;
-    riot[4] = value;
+    //interrupt_timer = ((value + 1) * prescale) - 1;
+    interrupt_timer = value * prescale;
+    riot[4] = interrupt_timer >> prescale_shift;
 
     return;
   }
@@ -105,13 +106,18 @@ void PIA::write_memory(int address, uint8_t value)
 
 void PIA::clock(int ticks)
 {
-  interrupt_timer -= ticks;
-
-  while (interrupt_timer < 0)
+  while (ticks > 0)
   {
-    interrupt_timer += prescale << 8;
+    interrupt_timer--;
+
+    if (interrupt_timer == 0)
+    {
+      prescale_shift = 0;
+    }
+
+    ticks--;
   }
 
-  riot[4] = interrupt_timer >> prescale_shift;
+  riot[4] = (interrupt_timer >> prescale_shift) & 0xff;
 }
 

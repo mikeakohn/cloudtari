@@ -45,8 +45,8 @@ void M6502::reset()
 
 void M6502::dump()
 {
-  printf(" PC=0x%04x SP=0x%04x\n", pc, sp);
-  printf(" A=%d X=%d Y=%d\n", reg_a, reg_x, reg_y);
+  printf(" PC: 0x%04x, SP: 0x%04x, A: 0x%02x, X: 0x%02x, Y: 0x%02x\n",
+    pc, sp, reg_a, reg_x, reg_y);
   printf(" N V B * D I Z C\n");
   printf(" %d %d %d %d %d %d %d %d\n",
     status.n,
@@ -238,6 +238,7 @@ int M6502::execute_instruction()
       reg_a = reg_a << 1;
       set_flags(reg_a);
       reg_a |= status.c;
+      status.z = reg_a == 0;
       return 2;
 
     case 0x2c:     //  BIT (Absolute)
@@ -360,6 +361,7 @@ int M6502::execute_instruction()
       if (status.v == 0)
       {
         pc += offset;
+        // FIXME: Is BVC 3 cycles no matter the page?
         return get_branch_cycles(a);
       }
 
@@ -423,9 +425,9 @@ int M6502::execute_instruction()
       reg_a = pop();
       return 4;
 
-    case 0x69:     //  AND (Immediate)
+    case 0x69:     //  ADC (Immediate)
       data = read_immediate();
-      run_and(data);
+      run_adc(data);
       return 2;
 
     case 0x6a:     //  ROR (Accumulator)
@@ -451,7 +453,7 @@ int M6502::execute_instruction()
       offset = read_immediate();
       a = pc;
 
-      if (status.v == 0)
+      if (status.v == 1)
       {
         pc += offset;
 
@@ -557,7 +559,7 @@ int M6502::execute_instruction()
       return 4;
 
     case 0x96:     //  STX (Zero Page, Y)
-      store_zero_page_y(reg_a);
+      store_zero_page_y(reg_x);
       return 4;
 
     case 0x98:     //  TYA
