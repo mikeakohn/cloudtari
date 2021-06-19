@@ -16,13 +16,13 @@
 #include "M6502.h"
 
 M6502::M6502() :
-  running(true),
-  reg_a(0),
-  reg_x(0),
-  reg_y(0),
-  total_cycles(0),
-  total_instructions(0),
-  debug(false)
+  running{true},
+  reg_a{0},
+  reg_x{0},
+  reg_y{0},
+  total_cycles{0},
+  total_instructions{0},
+  debug{false}
 {
 }
 
@@ -752,7 +752,7 @@ int M6502::execute_instruction()
       offset = read_immediate();
       a = pc;
 
-      if (status.z != 0)
+      if (status.z == 0)
       {
         pc += offset;
         return get_branch_cycles(a);
@@ -851,7 +851,7 @@ int M6502::execute_instruction()
       offset = read_immediate();
       a = pc;
 
-      if (status.z == 0)
+      if (status.z == 1)
       {
         pc += offset;
         return get_branch_cycles(a);

@@ -16,7 +16,7 @@
 #include "PIA.h"
 #include "TIA.h"
 
-MemoryBus::MemoryBus() : rom(nullptr)
+MemoryBus::MemoryBus() : rom{nullptr}
 {
   tia = new TIA();
   pia = new PIA();

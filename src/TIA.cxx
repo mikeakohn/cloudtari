@@ -22,9 +22,7 @@
 // Total Resolution: 228x262
 // Visible Resolution: 160x192
 
-TIA::TIA() :
-  pos_x(0),
-  pos_y(0)
+TIA::TIA() : pos_x{0}, pos_y{0}
 {
   for (int n = 0; n < 256; n++)
   {
@@ -131,6 +129,7 @@ void TIA::write_memory(int address, uint8_t value)
       break;
     default:
       write_regs[address] = value;
+      break;
   }
 }
 
@@ -159,15 +158,12 @@ void TIA::build_playfield()
 void TIA::clock()
 {
   // The main playfield area starts after 68 clocks.
-  if (pos_x >= 68)
+  if (pos_x >= 68 && pos_y >= 37)
   {
     // The point to the first bit to be displayed from PF0, PF1, PF2.
     if (pos_x == 68) { playfield.reset(); }
 
     draw_pixel();
-
-    // Every 4 screen pixels, increment playfield pixel.
-    if (((pos_x - 68) % 4) == 0) { playfield.next_pixel(); }
 
 #if 0
     if ((player0 & 0xf00) != 0)
@@ -184,6 +180,9 @@ void TIA::clock()
   }
 
   pos_x++;
+
+  // Every 4 screen pixels, increment playfield pixel.
+  if (((pos_x - 68) % 4) == 0) { playfield.next_pixel(); }
 
   if (pos_x == 68 + 160)
   {
@@ -211,7 +210,7 @@ bool TIA::draw_playfield_fg()
 {
   if (playfield.is_pixel_on())
   { 
-    television->draw_pixel(pos_x, pos_y, colors.playfield);
+    television->draw_pixel(get_x(), get_y(), colors.playfield);
 
     return true;
   }
@@ -248,7 +247,7 @@ void TIA::draw_playfield_bg()
 {
   if (playfield.is_pixel_off())
   {
-    television->draw_pixel(pos_x, pos_y, colors.background);
+    television->draw_pixel(get_x(), get_y(), colors.background);
   }
 }
 

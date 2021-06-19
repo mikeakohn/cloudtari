@@ -41,6 +41,9 @@ public:
   bool wait_for_hsync() { return write_regs[WSYNC] != 0; }
 
 private:
+  int get_x() { return pos_x - 68; }
+  int get_y() { return pos_y - 37; }
+
   struct GraphicsObject
   {
     GraphicsObject() : data{0}, current_pixel{1} { }
