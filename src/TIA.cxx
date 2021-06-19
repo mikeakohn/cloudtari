@@ -151,14 +151,14 @@ void TIA::build_playfield()
     playfield.data |=
       (((uint64_t)reverse[write_regs[PF0]] & 0x0f) << 36) |
        ((uint64_t)write_regs[PF1] << 28) |
-       (reverse[write_regs[PF2]] << 20);
+       ((uint64_t)reverse[write_regs[PF2]] << 20);
   }
 }
 
 void TIA::clock()
 {
   // The main playfield area starts after 68 clocks.
-  if (pos_x >= 68 && pos_y >= 37)
+  if (pos_x >= 68 && pos_y >= 40 && pos_y < 232)
   {
     // The point to the first bit to be displayed from PF0, PF1, PF2.
     if (pos_x == 68) { playfield.reset(); }

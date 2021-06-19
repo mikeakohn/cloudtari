@@ -20,14 +20,14 @@ TelevisionSDL::TelevisionSDL()
     "Debug",
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOWPOS_UNDEFINED,
-    640,
     480,
+    384,
     0);
 
   background_rect.x = 0;
   background_rect.y = 0;
-  background_rect.w = 640;
-  background_rect.h = 480;
+  background_rect.w = 480;
+  background_rect.h = 384;
 
   //renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 
@@ -63,9 +63,9 @@ void TelevisionSDL::draw_pixel(int x, int y, uint32_t color)
 {
   SDL_Rect rect;
 
-  rect.x = x * 2;
+  rect.x = x * 3;
   rect.y = y * 2;
-  rect.w = 2;
+  rect.w = 3;
   rect.h = 2;
 
   SDL_FillRect(screen, &rect, color);

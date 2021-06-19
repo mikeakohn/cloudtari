@@ -53,7 +53,7 @@ private:
     void next_pixel() { current_pixel <<= 1; }
 
     uint64_t data;
-    int current_pixel;
+    uint64_t current_pixel;
   };
 
   struct Colors
