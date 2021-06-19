@@ -33,7 +33,7 @@ void PIA::reset()
   riot[0] = 255;
 
   prescale = TIM1T;
-  prescale_s = TIM1T_S;
+  prescale_shift = TIM1T_SHIFT;
 }
 
 uint8_t PIA::read_memory(int address)
@@ -42,6 +42,13 @@ uint8_t PIA::read_memory(int address)
   {
     return ram[address];
   }
+
+#if 0
+  if (address == INTIM)
+  {
+    return interrupt_timer;
+  }
+#endif
 
   return riot[address & 0x07];
 }
@@ -57,34 +64,39 @@ void PIA::write_memory(int address, uint8_t value)
 
   if (address >= 0x294)
   {
-    if (address == 0x294)
+    // The timer is set by writing a value or count (from 1 to 255).
+    // to the address of the desired interval setting according to
+    // the following table:
+    switch (address)
     {
-      prescale = TIM1T;
-      prescale_s = TIM1T_S;
-    }
-      else
-    if (address == 0x295)
-    {
-      prescale = TIM8T;
-      prescale_s = TIM8T_S;
-    }
-      else
-    if (address == 0x296)
-    {
-      prescale = TIM64T;
-      prescale_s = TIM64T_S;
-    }
-      else
-    if (address == 0x297)
-    {
-      prescale = T1024T;
-      prescale_s = T1024T_S;
+      case 0x294:
+        // 0x294: 1 clock
+        prescale = TIM1T;
+        prescale_shift = TIM1T_SHIFT;
+        break;
+      case 0x295:
+        // 0x295: 8 clocks
+        prescale = TIM8T;
+        prescale_shift = TIM8T_SHIFT;
+        break;
+      case 0x296:
+        // 0x296: 64 clocks
+        prescale = TIM64T;
+        prescale_shift = TIM64T_SHIFT;
+        break;
+      case 0x297:
+        // 0x297: 1024 clocks
+        prescale = T1024T;
+        prescale_shift = T1024T_SHIFT;
+        break;
     }
 
     interrupt_timer = ((value + 1) * prescale) - 1;
     riot[4] = value;
+
+    return;
   }
-    else
+
   if (address < 0x284)
   {
     riot[address & 0x07] = value;
@@ -100,6 +112,6 @@ void PIA::clock(int ticks)
     interrupt_timer += prescale << 8;
   }
 
-  riot[4] = interrupt_timer >> prescale_s;
+  riot[4] = interrupt_timer >> prescale_shift;
 }
 

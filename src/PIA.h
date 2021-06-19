@@ -30,13 +30,15 @@ private:
   const int TIM8T = 8;
   const int TIM64T = 64;
   const int T1024T = 1024;
-  const int TIM1T_S = 0;
-  const int TIM8T_S = 3;
-  const int TIM64T_S = 6;
-  const int T1024T_S = 10;
+  const int TIM1T_SHIFT = 0;
+  const int TIM8T_SHIFT = 3;
+  const int TIM64T_SHIFT = 6;
+  const int T1024T_SHIFT = 10;
+
+  const int INTIM = 0x284;
 
   int prescale;
-  int prescale_s;
+  int prescale_shift;
   int interrupt_timer = 255;
 
   uint8_t riot[8];
