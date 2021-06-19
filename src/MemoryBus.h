@@ -27,6 +27,7 @@ public:
   uint8_t read(int address);
   void write(int address, uint8_t value);
   void dump(int start, int end);
+  void clock(int cycles);
   TIA *get_tia() { return tia; }
 
   uint16_t read16(int address)

@@ -37,15 +37,36 @@ public:
   bool draw_ball();
   void draw_playfield_bg();
   void draw_pixel();
+  void dump();
   bool wait_for_hsync() { return write_regs[WSYNC] != 0; }
 
 private:
+  struct GraphicsObject
+  {
+    GraphicsObject() : data{0}, current_pixel{1} { }
+    void reset() { current_pixel = 1; }
+    bool is_pixel_on() { return (data & current_pixel) != 0; }
+    bool is_pixel_off() { return (data & current_pixel) == 0; }
+    void next_pixel() { current_pixel <<= 1; }
+
+    uint64_t data;
+    int current_pixel;
+  };
+
+  struct Colors
+  {
+    uint32_t playfield;
+    uint32_t background;
+    uint32_t player_0;
+    uint32_t player_1;
+  } colors;
+
   Television *television;
 
   int pos_x;
   int pos_y;
-  int pf_pixel;
-  uint64_t playfield;
+
+  GraphicsObject playfield;
 
   uint8_t write_regs[64];
   uint8_t read_regs[16];

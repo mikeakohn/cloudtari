@@ -22,6 +22,8 @@
 
 int main(int argc, char *argv[])
 {
+  int cycles;
+  bool debug = false;
   Television *television;
 
   if (argc != 3)
@@ -39,35 +41,64 @@ int main(int argc, char *argv[])
   memory_bus->set_rom(rom);
   m6502->set_memory_bus(memory_bus);
   m6502->reset();
-  m6502->set_debug();
 
   if (strcmp(argv[2], "sdl") == 0)
   {
     television = new TelevisionSDL();
   }
     else
+  if (strcmp(argv[2], "debug") == 0)
+  {
+    television = new TelevisionNull();
+    debug = true;
+    m6502->set_debug();
+  }
+    else
   {
     television = new TelevisionNull();
   }
 
+  if (debug) { m6502->set_debug(); }
+
   television->init();
 
-  memory_bus->get_tia()->set_television(television);
+  TIA *tia = memory_bus->get_tia();
+  tia->set_television(television);
 
   // memory_bus->dump(0xf000, 0xffff);
 
   while (m6502->is_running())
   {
-    int cycles = m6502->step();
+    if (tia->wait_for_hsync())
+    {
+      cycles = 1;
+      m6502->clock(cycles);
+    }
+      else
+    {
+      cycles = m6502->step();
+    }
 
-    printf("  cycles=%d\n", cycles);
-    m6502->dump();
+    memory_bus->clock(cycles);
+
+    if (debug)
+    {
+      printf("  cycles=%d\n", cycles);
+      m6502->dump();
+      tia->dump();
+
+      if (!tia->wait_for_hsync())
+      {
+        //sleep(1);
+        usleep(1000);
+      }
+    }
 
     if (television->handle_events() == -1) { break; }
 
-    sleep(1);
+    //sleep(1);
 
-    television->clear_display();
+    //television->clear_display();
   }
 
   delete m6502;

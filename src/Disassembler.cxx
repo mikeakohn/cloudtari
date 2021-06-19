@@ -61,7 +61,7 @@ int Disassembler::disassemble(uint8_t *code, int pc, char *text)
       sprintf(text, "%s (0x%04x,x)", opcode.name, code[1] | (code[2] << 8));
       return 3;
     case OP_RELATIVE:
-      sprintf(text, "%s 0x%04x", opcode.name, pc + 2 + (int8_t)code[1]);
+      sprintf(text, "%s 0x%04x (offset=%d)", opcode.name, pc + 2 + (int8_t)code[1], (int8_t)code[1]);
       return 2;
     case OP_ADDRESS8_RELATIVE:
       sprintf(text, "%s 0x%02x 0x%04x", opcode.name, code[1], pc + 2 + (int8_t)code[2]);

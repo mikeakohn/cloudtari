@@ -44,7 +44,6 @@ void M6502::reset()
 
 void M6502::dump()
 {
-  printf("----- 6502 -----\n");
   printf(" PC=0x%04x SP=0x%04x\n", pc, sp);
   printf(" A=%d X=%d Y=%d\n", reg_a, reg_x, reg_y);
   printf(" N V B * D I Z C\n");
@@ -95,9 +94,9 @@ int M6502::execute_instruction()
     code[1] = memory_bus->read(address + 1);
     code[2] = memory_bus->read(address + 2);
 
-    Disassembler::disassemble(code, pc, text);
+    Disassembler::disassemble(code, address, text);
 
-    printf("0x%04x: %02x - %s\n", address, opcode, text);
+    printf(" --- 0x%04x: %02x - %s ---\n", address, opcode, text);
   }
 
   switch (opcode)

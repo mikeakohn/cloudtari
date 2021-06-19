@@ -8,6 +8,7 @@ LDFLAGS=-lSDL2
 VPATH=../src
 
 OBJECTS= \
+  ColorTable.o \
   Disassembler.o \
   M6502.o \
   MemoryBus.o \

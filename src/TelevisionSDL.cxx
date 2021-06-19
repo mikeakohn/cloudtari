@@ -73,6 +73,8 @@ void TelevisionSDL::draw_pixel(int x, int y, uint32_t color)
 
 bool TelevisionSDL::refresh()
 {
+  SDL_UpdateWindowSurface(window);
+
   return true;
 }
 

@@ -88,3 +88,9 @@ void MemoryBus::dump(int start, int end)
   printf("\n");
 }
 
+void MemoryBus::clock(int cycles)
+{
+  tia->clock(cycles);
+  pia->clock(cycles);
+}
+

@@ -9,8 +9,11 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "ColorTable.h"
 #include "TIA.h"
 
 // Atari 2600 has:
@@ -44,7 +47,8 @@ void TIA::init()
 #endif
 
   pos_x = 0;
-  pf_pixel = 1;
+
+  playfield.reset();
 
   memset(write_regs, 0, sizeof(write_regs));
   memset(read_regs, 0, sizeof(read_regs));
@@ -67,13 +71,30 @@ void TIA::write_memory(int address, uint8_t value)
       write_regs[WSYNC] = 1;
       break;
     case VSYNC:
-      television->refresh();
-      pos_x = 0;
-      pos_y = 0;
+      if ((value & 2) == 2)
+      {
+        television->refresh();
+        pos_x = 0;
+        pos_y = 0;
+      }
+      break;
+    case COLUP0:
+      colors.player_0 = ColorTable::get_color(value);
+      break;
+    case COLUP1:
+      colors.player_1 = ColorTable::get_color(value);
+      break;
+    case COLUPF:
+      colors.playfield = ColorTable::get_color(value);
+      break;
+    case COLUBK:
+      colors.background = ColorTable::get_color(value);
       break;
     case PF0:
     case PF1:
     case PF2:
+      write_regs[address] = value;
+      build_playfield();
       break;
     case RESP0:
       // Reset player 0.
@@ -115,7 +136,7 @@ void TIA::write_memory(int address, uint8_t value)
 
 void TIA::build_playfield()
 {
-  playfield =
+  playfield.data =
     ((write_regs[PF0] >> 4) & 0x0f) |
      (reverse[write_regs[PF1]] << 4) |
      (write_regs[PF2] << 12);
@@ -123,12 +144,12 @@ void TIA::build_playfield()
   if ((write_regs[CTRLPF] & 1) == 0)
   {
     // Non-mirroed playfield
-    playfield |= playfield << 20;
+    playfield.data |= playfield.data << 20;
   }
     else
   {
     // Mirrored playfield.
-    playfield |=
+    playfield.data |=
       (((uint64_t)reverse[write_regs[PF0]] & 0x0f) << 36) |
        ((uint64_t)write_regs[PF1] << 28) |
        (reverse[write_regs[PF2]] << 20);
@@ -140,13 +161,13 @@ void TIA::clock()
   // The main playfield area starts after 68 clocks.
   if (pos_x >= 68)
   {
-    // The pf_pixel points to the next bit to be displayed from PF0, PF1, PF2.
-    if (pos_x == 68) { pf_pixel = 1; }
+    // The point to the first bit to be displayed from PF0, PF1, PF2.
+    if (pos_x == 68) { playfield.reset(); }
 
     draw_pixel();
 
     // Every 4 screen pixels, increment playfield pixel.
-    if (((pos_x - 68) % 4) == 0) { pf_pixel = pf_pixel << 1; }
+    if (((pos_x - 68) % 4) == 0) { playfield.next_pixel(); }
 
 #if 0
     if ((player0 & 0xf00) != 0)
@@ -188,9 +209,9 @@ void TIA::clock(int ticks)
 
 bool TIA::draw_playfield_fg()
 {
-  if ((playfield & pf_pixel) != 0)
+  if (playfield.is_pixel_on())
   { 
-    television->draw_pixel(pos_x, pos_y, write_regs[COLUPF]);
+    television->draw_pixel(pos_x, pos_y, colors.playfield);
 
     return true;
   }
@@ -225,9 +246,9 @@ bool TIA::draw_ball()
 
 void TIA::draw_playfield_bg()
 {
-  if ((playfield & pf_pixel) == 0)
+  if (playfield.is_pixel_off())
   {
-    television->draw_pixel(pos_x, pos_y, write_regs[COLUBK]);
+    television->draw_pixel(pos_x, pos_y, colors.background);
   }
 }
 
@@ -255,5 +276,10 @@ void TIA::draw_pixel()
   }
 
   draw_playfield_bg();
+}
+
+void TIA::dump()
+{
+  printf("TIA: pos_x=%d pos_y=%d\n", pos_x, pos_y);
 }
 
