@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     if (tia->wait_for_hsync())
     {
       cycles = 1;
-      m6502->clock(cycles);
+      m6502->clock();
     }
       else
     {

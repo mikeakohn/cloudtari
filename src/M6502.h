@@ -30,7 +30,7 @@ public:
   void dump();
   void illegal_instruction(uint8_t opcode);
   bool is_running() { return running; }
-  void clock(int ticks) { total_cycles += ticks; }
+  void clock(int ticks = 1) { total_cycles += ticks; }
   int step();
 
 private:
