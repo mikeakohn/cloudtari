@@ -84,7 +84,7 @@ int M6502::execute_instruction()
   int address = pc++;
   uint8_t opcode = memory_bus->read(address);
   //int cycles = 0;
-  int a, data;
+  int a, b, data;
   int8_t offset;
 
   if (debug)
@@ -165,9 +165,9 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x11:     //  ORA (Indirect), Y
-      data = read_indirect_y(a);
+      data = read_indirect_y(a, b);
       run_or(data);
-      return same_page(a) ? 5 : 6;
+      return same_page(a, b) ? 5 : 6;
 
     case 0x15:     //  ORA Zero Page, X
       data = read_zero_page_x(a);
@@ -184,17 +184,17 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x19:     //  ORA Absolute, Y
-      data = read_absolute_y(a);
+      data = read_absolute_y(a, b);
       run_or(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0x1d:     //  ORA Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_or(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0x1e:     //  ASL Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_asl_memory(a, data);
       return 7;
 
@@ -270,9 +270,9 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x31:     //  AND (Indirect), Y
-      data = read_indirect_y(a);
+      data = read_indirect_y(a, b);
       run_and(data);
-      return same_page(a) ? 5 : 6;
+      return same_page(a, b) ? 5 : 6;
 
     case 0x35:     //  AND Zero Page, X
       data = read_zero_page_x(a);
@@ -289,17 +289,17 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x39:     //  AND Absolute, Y
-      data = read_absolute_y(a);
+      data = read_absolute_y(a, b);
       run_and(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0x3d:     //  AND Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_and(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0x3e:     //  ROR Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_ror_memory(a, data);
       return 7;
 
@@ -368,9 +368,9 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x51:     //  EOR (Indirect), Y
-      data = read_indirect_y(a);
+      data = read_indirect_y(a, b);
       run_eor(data);
-      return same_page(a) ? 5 : 6;
+      return same_page(a, b) ? 5 : 6;
 
     case 0x55:     //  EOR Zero Page, X
       data = read_zero_page_x(a);
@@ -387,17 +387,17 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x59:     //  EOR Absolute, Y
-      data = read_absolute_y(a);
+      data = read_absolute_y(a, b);
       run_eor(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0x5d:     //  EOR Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_eor(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0x5e:     //  LSR Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_lsr_memory(a, data);
       return 7;
 
@@ -463,9 +463,9 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x71:     //  ADC (Indirect), Y
-      data = read_indirect_y(a);
+      data = read_indirect_y(a, b);
       run_adc(data);
-      return same_page(a) ? 5 : 6;
+      return same_page(a, b) ? 5 : 6;
 
     case 0x75:     //  ADC ZeroPage, X
       data = read_zero_page_x(a);
@@ -482,17 +482,17 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x79:     //  ADC Absolute, Y
-      data = read_absolute_y(a);
+      data = read_absolute_y(a, b);
       run_adc(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0x7d:     //  ADC Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_adc(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0x7e:     //  ROL Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_rol_memory(a, data);
       return 7;
 
@@ -654,9 +654,9 @@ int M6502::execute_instruction()
       return 2;
 
     case 0xb1:     //  LDA (Indirect), Y
-      reg_a = read_indirect_y(a);
+      reg_a = read_indirect_y(a, b);
       set_load_flags(reg_a);
-      return same_page(a) ? 5 : 6;
+      return same_page(a, b) ? 5 : 6;
 
     case 0xb4:     //  LDY Zero Page, X
       reg_y = read_zero_page_x(a);
@@ -678,9 +678,9 @@ int M6502::execute_instruction()
       return 2;
 
     case 0xb9:     //  LDA Absolute, Y
-      reg_a = read_absolute_y(a);
+      reg_a = read_absolute_y(a, b);
       set_load_flags(reg_a);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0xba:     //  TSX
       reg_x = sp;
@@ -688,19 +688,19 @@ int M6502::execute_instruction()
       return 2;
 
     case 0xbc:     //  LDY Absolute, X
-      reg_y = read_absolute_x(a);
+      reg_y = read_absolute_x(a, b);
       set_load_flags(reg_y);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0xbd:     //  LDA Absolute, X
-      reg_a = read_absolute_x(a);
+      reg_a = read_absolute_x(a, b);
       set_load_flags(reg_a);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0xbe:     //  LDX Absolute, Y
-      reg_x = read_absolute_y(a);
+      reg_x = read_absolute_y(a, b);
       set_load_flags(reg_x);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0xc0:     //  CPY Immediate
       data = read_immediate();
@@ -770,9 +770,9 @@ int M6502::execute_instruction()
       return 2;
 
     case 0xd1:     //  CMP (Indirect), Y
-      data = read_indirect_y(a);
+      data = read_indirect_y(a, b);
       run_compare(reg_a, data);
-      return same_page(a) ? 5 : 6;
+      return same_page(a, b) ? 5 : 6;
 
     case 0xd5:     //  CMP Zero Page, X
       data = read_zero_page_x(a);
@@ -789,17 +789,17 @@ int M6502::execute_instruction()
       return 2;
 
     case 0xd9:     //  CMP Absolute, Y
-      data = read_absolute_y(a);
+      data = read_absolute_y(a, b);
       run_compare(reg_a, data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0xdd:     //  CMP Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_compare(reg_a, data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0xde:     //  DEC Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_dec_memory(a, data);
       return 7;
 
@@ -869,9 +869,9 @@ int M6502::execute_instruction()
       return 2;
 
     case 0xf1:     //  SBC (Indirect), Y
-      data = read_indirect_y(a);
+      data = read_indirect_y(a, b);
       run_sbc(data);
-      return same_page(a) ? 5 : 6;
+      return same_page(a, b) ? 5 : 6;
 
     case 0xf5:     //  SBC Zero Page, X
       data = read_zero_page_x(a);
@@ -888,17 +888,17 @@ int M6502::execute_instruction()
       return 2;
 
     case 0xf9:     //  SBC Absolute, Y
-      data = read_absolute_y(a);
+      data = read_absolute_y(a, b);
       run_sbc(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0xfd:     //  SBC Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_sbc(data);
-      return same_page(a) ? 4 : 5;
+      return same_page(a, b) ? 4 : 5;
 
     case 0xfe:     //  INC Absolute, X
-      data = read_absolute_x(a);
+      data = read_absolute_x(a, b);
       run_inc_memory(a, data);
       return 7;
 

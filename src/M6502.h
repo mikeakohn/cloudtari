@@ -31,6 +31,7 @@ public:
   void illegal_instruction(uint8_t opcode);
   bool is_running() { return running; }
   void clock(int ticks = 1) { total_cycles += ticks; }
+  int get_pc() { return pc; }
   int step();
 
 private:
@@ -63,17 +64,21 @@ private:
     return memory_bus->read(m);
   }
 
-  int read_absolute_x(int &address)
+  int read_absolute_x(int &address, int &address_before)
   {
-    int m = memory_bus->read16(pc) + reg_x;
+    int m = memory_bus->read16(pc);
+    address_before = m;
+    m += reg_x;
     address = m;
     pc += 2;
     return memory_bus->read(m);
   }
 
-  int read_absolute_y(int &address)
+  int read_absolute_y(int &address, int &address_before)
   {
-    int m = memory_bus->read16(pc) + reg_y;
+    int m = memory_bus->read16(pc);
+    address_before = m;
+    m += reg_y;
     address = m;
     pc += 2;
     return memory_bus->read(m);
@@ -88,11 +93,13 @@ private:
     return memory_bus->read(m);
   }
 
-  int read_indirect_y(int &address)
+  int read_indirect_y(int &address, int &address_before)
   {
     int m;
     m = memory_bus->read(pc++);
-    m = memory_bus->read16(m) + reg_y;
+    m = memory_bus->read16(m);
+    address_before = m;
+    m += reg_y;
     m = m & 0xffff;
     address = m;
     return memory_bus->read(m);
@@ -368,6 +375,11 @@ private:
   bool same_page(int address)
   {
     return (pc >> 8) == (address >> 8);
+  }
+
+  bool same_page(int address, int address_before)
+  {
+    return (address >> 8) == (address_before >> 8);
   }
 
   MemoryBus *memory_bus;

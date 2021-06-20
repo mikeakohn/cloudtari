@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "DebugTimer.h"
 #include "M6502.h"
 #include "MemoryBus.h"
 #include "ROM.h"
@@ -61,6 +62,7 @@ int main(int argc, char *argv[])
   if (debug) { m6502->set_debug(); }
   //m6502->set_breakpoint(0xf060);
   //m6502->set_breakpoint(0xf13d);
+  //m6502->set_breakpoint(0xf622);
 
   television->init();
 
@@ -68,6 +70,12 @@ int main(int argc, char *argv[])
   tia->set_television(television);
 
   // memory_bus->dump(0xf000, 0xffff);
+
+#if 0
+  DebugTimer debug_timer;
+  debug_timer.set(0xf61b, 0xf643);
+  //debug_timer.set(0xf645, 0xf64a);
+#endif
 
   while (m6502->is_running())
   {
@@ -78,7 +86,10 @@ int main(int argc, char *argv[])
     }
       else
     {
+      //int address = m6502->get_pc();
       cycles = m6502->step();
+
+      //debug_timer.compute(address, cycles);
     }
 
     memory_bus->clock(cycles);
