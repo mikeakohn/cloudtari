@@ -49,7 +49,15 @@ private:
     GraphicsObject() : data{0}, current_pixel{1} { }
     void reset() { current_pixel = 1; }
     bool is_pixel_on() { return (data & current_pixel) != 0; }
-    bool is_pixel_off() { return (data & current_pixel) == 0; }
+
+    bool is_pixel_on(int pos_x)
+    {
+      if (pos_x < 68) { return false; }
+      pos_x = (pos_x - 68) / 4;
+
+      return (data & (1ULL << pos_x)) != 0;
+    }
+
     void next_pixel() { current_pixel <<= 1; }
 
     uint64_t data;

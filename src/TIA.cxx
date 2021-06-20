@@ -40,11 +40,8 @@ TIA::~TIA()
 
 void TIA::init()
 {
-#if 0
-  television.init();
-#endif
-
   pos_x = 0;
+  pos_y = 0;
 
   playfield.reset();
 
@@ -182,7 +179,7 @@ void TIA::clock()
   pos_x++;
 
   // Every 4 screen pixels, increment playfield pixel.
-  if (((pos_x - 68) % 4) == 0) { playfield.next_pixel(); }
+  //if (((pos_x - 68) % 4) == 0) { playfield.next_pixel(); }
 
   if (pos_x == 68 + 160)
   {
@@ -197,8 +194,6 @@ void TIA::clock(int ticks)
   // Every CPU cycle is 3 pixels.
   ticks = ticks * 3;
 
-  //while (ticks > 0 || write_regs[WSYNC] != 0)
-
   while (ticks > 0)
   {
     clock();
@@ -208,7 +203,8 @@ void TIA::clock(int ticks)
 
 bool TIA::draw_playfield_fg()
 {
-  if (playfield.is_pixel_on())
+  //if (playfield.is_pixel_on())
+  if (playfield.is_pixel_on(pos_x))
   { 
     television->draw_pixel(get_x(), get_y(), colors.playfield);
 
@@ -245,10 +241,7 @@ bool TIA::draw_ball()
 
 void TIA::draw_playfield_bg()
 {
-  if (playfield.is_pixel_off())
-  {
-    television->draw_pixel(get_x(), get_y(), colors.background);
-  }
+  television->draw_pixel(get_x(), get_y(), colors.background);
 }
 
 void TIA::draw_pixel()
@@ -279,6 +272,14 @@ void TIA::draw_pixel()
 
 void TIA::dump()
 {
-  printf("TIA: pos_x=%d pos_y=%d\n", pos_x, pos_y);
+  printf("TIA: pos_x=%d pos_y=%d  wait_for_hsync=%s\n",
+    pos_x, pos_y, wait_for_hsync() ? "on" : "off");
+
+  printf("playfield: ");
+  for (int n = 0; n < 40; n++)
+  {
+    printf("%c", (playfield.data & (1ULL << n)) != 0 ? '*' : '.');
+  }
+  printf("\n");
 }
 
