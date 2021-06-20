@@ -30,9 +30,19 @@ ROM::~ROM()
 
 int ROM::load(const char *filename)
 {
-  FILE *in = fopen(filename, "rb");
   struct stat statbuf;
-  int len = -1;
+  memset(&statbuf, 0, sizeof(statbuf));
+  stat(filename, &statbuf);
+
+  if (statbuf.st_size != 2048 &&
+      statbuf.st_size != 4096 &&
+      statbuf.st_size != 8192)
+  {
+    printf("Error: ROM size is not 2048, 4096, 8192 (%ld)\n", statbuf.st_size);
+    return -1;
+  }
+
+  FILE *in = fopen(filename, "rb");
 
   if (in == NULL)
   {
@@ -40,29 +50,33 @@ int ROM::load(const char *filename)
     return -1;
   }
 
-  memset(&statbuf, 0, sizeof(statbuf));
-  stat(filename, &statbuf);
-
-  if (statbuf.st_size == 4096)
-  {
-    len = fread(memory, 1, statbuf.st_size, in);
-  }
-    else
-  if (statbuf.st_size == 2048)
-  {
-    len = fread(memory + 2048, 1, statbuf.st_size, in);
-  }
-
+  size = fread(full, 1, statbuf.st_size, in);
   fclose(in);
 
-  if (len != statbuf.st_size)
+  if (size != statbuf.st_size)
   {
-    printf("Error: ROM size is not 2048 or 4096 (%d / %ld)\n", len, statbuf.st_size);
+    printf("Error: Could not load ROM %d/%ld\n", size, statbuf.st_size);
     return -2;
   }
 
-  size = len;
+  if (size == 2048)
+  {
+    memcpy(memory + 2048, full, 2048);
+  }
+    else
+  {
+    memcpy(memory, full, 4096);
+  }
 
   return 0;
+}
+
+bool ROM::set_bank(int value)
+{
+  if (size < 8192) { return false; }
+
+  memcpy(memory, full + (value * 4096), 4096);
+
+  return true;
 }
 

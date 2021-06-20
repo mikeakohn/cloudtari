@@ -24,6 +24,8 @@ public:
   uint8_t read_memory(int address);
   void write_memory(int address, uint8_t value);
   void clock(int ticks);
+  void set_switch_reset() { riot[SWCHB & 0x7] &= 0xfe; }
+  void clear_switch_reset() { riot[SWCHB & 0x7] |= 0x01; }
 
 private:
   const int TIM1T = 1;

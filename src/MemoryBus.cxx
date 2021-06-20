@@ -38,6 +38,16 @@ uint8_t MemoryBus::read(int address)
   // Takes care of mirrored memory.
   if ((address & 0x1000) == 0x1000)
   {
+    if (address == 0x1ff9)
+    {
+      if (rom->set_bank(1)) { return 0; }
+    }
+      else
+    if (address == 0x1ff8)
+    {
+      if (rom->set_bank(0)) { return 0; }
+    }
+
     return rom->read_int8(address & 0x0fff);
   }
 

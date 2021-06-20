@@ -87,10 +87,13 @@ int TelevisionSDL::handle_events()
     switch(event.type)
     {
       case SDL_KEYDOWN:
-        if (event.key.keysym.sym == SDLK_ESCAPE)
-        {
-          return -1;
-        }
+        if (event.key.keysym.sym == SDLK_ESCAPE) { return -1; }
+        if (event.key.keysym.sym == SDLK_TAB) { return 1; }
+        break;
+
+      case SDL_KEYUP:
+        if (event.key.keysym.sym == SDLK_TAB) { return 2; }
+        break;
 
         break;
       case SDL_QUIT:
@@ -98,6 +101,7 @@ int TelevisionSDL::handle_events()
     }
   }
 
+#if 0
   const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
   //if (keystate[SDLK_ESCAPE])
@@ -105,6 +109,7 @@ int TelevisionSDL::handle_events()
   {
     return -1;
   }
+#endif
 
   return 0;
 }

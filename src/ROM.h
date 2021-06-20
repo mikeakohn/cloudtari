@@ -21,6 +21,7 @@ public:
   ~ROM();
 
   int load(const char *filename);
+  bool set_bank(int value);
 
   uint8_t read_int8(int address)
   {
@@ -34,6 +35,7 @@ public:
 
 private:
   uint8_t memory[4096];
+  uint8_t full[8192];
   int size;
 };
 

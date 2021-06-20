@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
 
   television->init();
 
+  PIA *pia = memory_bus->get_pia();
   TIA *tia = memory_bus->get_tia();
   tia->set_television(television);
 
@@ -108,9 +109,21 @@ int main(int argc, char *argv[])
       }
     }
 
-    if (television->handle_events() == -1) { break; }
+    int event_code = television->handle_events();
 
-    //sleep(1);
+    if (event_code == -1) { break; }
+
+    switch (event_code)
+    {
+      case 1:
+        pia->set_switch_reset();
+printf("reset down\n");
+        break;
+      case 2:
+printf("reset up\n");
+        pia->clear_switch_reset();
+        break;
+    }
 
     //television->clear_display();
   }
