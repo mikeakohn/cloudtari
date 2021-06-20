@@ -30,7 +30,8 @@ void PIA::reset()
   memset(ram, 0, sizeof(ram));
   memset(riot, 0, sizeof(riot));
 
-  riot[0] = 255;
+  riot[SWCHA & 0x07] = 0xff;
+  riot[SWACNT & 0x07] = 0xff;
   riot[SWCHB & 0x07] = 0x03;
 
   prescale = TIM1T;
@@ -99,15 +100,8 @@ void PIA::write_memory(int address, uint8_t value)
     return;
   }
 
-  if ((address & SWCHB) == 2)
-  {
-    return;
-  }
-
-  if (address < 0x280)
-  {
-    riot[address & 0x07] = value;
-  }
+  // The rest of the registers should be read-only (except SWACNT maybe?).
+  return;
 }
 
 void PIA::clock(int ticks)

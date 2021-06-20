@@ -113,17 +113,17 @@ int M6502::execute_instruction()
       stop();
       return 7;
 
-    case 0x01:     //  ORA ((Indirect, X))
+    case 0x01:     //  ORA (Indirect, X)
       data = read_indirect_x(a);
       run_or(data);
       return 6;
 
-    case 0x05:     //  ORA (Zero Page)
+    case 0x05:     //  ORA Zero Page
       data = read_zero_page(a);
       run_or(data);
       return 3;
 
-    case 0x06:     //  ASL (Zero Page)
+    case 0x06:     //  ASL Zero Page
       data = read_zero_page(a);
       run_asl_memory(a, data);
       return 5;
@@ -132,22 +132,22 @@ int M6502::execute_instruction()
       push(status.reg_p);
       return 3;
 
-    case 0x09:     //  ORA (Immediate)
+    case 0x09:     //  ORA #Immediate
       data = read_immediate();
       run_or(data);
       return 2;
 
-    case 0x0a:     //  ASL (Accumulator)
+    case 0x0a:     //  ASL <Accumulator>
       reg_a <<= 1;
       set_flags(reg_a);
       return 2;
 
-    case 0x0d:     //  ORA (Absolute)
+    case 0x0d:     //  ORA Absolute
       data = read_absolute(a);
       run_or(data);
       return 4;
 
-    case 0x0e:     //  ASL (Absolute)
+    case 0x0e:     //  ASL Absolute
       data = read_absolute(a);
       run_asl_memory(a, data);
       return 6;
@@ -164,17 +164,17 @@ int M6502::execute_instruction()
 
       return 2;
 
-    case 0x11:     //  ORA ((Indirect), Y)
+    case 0x11:     //  ORA (Indirect), Y
       data = read_indirect_y(a);
       run_or(data);
       return same_page(a) ? 5 : 6;
 
-    case 0x15:     //  ORA (Zero Page, X)
+    case 0x15:     //  ORA Zero Page, X
       data = read_zero_page_x(a);
       run_or(data);
       return 4;
 
-    case 0x16:     //  ASL (Zero Page, X)
+    case 0x16:     //  ASL Zero Page, X
       data = read_zero_page_x(a);
       run_asl_memory(a, data);
       return 6;
@@ -183,17 +183,17 @@ int M6502::execute_instruction()
       status.c = 0;
       return 2;
 
-    case 0x19:     //  ORA (Absolute, Y)
+    case 0x19:     //  ORA Absolute, Y
       data = read_absolute_y(a);
       run_or(data);
       return same_page(a) ? 4 : 5;
 
-    case 0x1d:     //  ORA (Absolute, X)
+    case 0x1d:     //  ORA Absolute, X
       data = read_absolute_x(a);
       run_or(data);
       return same_page(a) ? 4 : 5;
 
-    case 0x1e:     //  ASL (Absolute, X)
+    case 0x1e:     //  ASL Absolute, X
       data = read_absolute_x(a);
       run_asl_memory(a, data);
       return 7;
@@ -205,22 +205,22 @@ int M6502::execute_instruction()
       pc = data;
       return 6;
 
-    case 0x21:     //  AND ((Indirect, X))
+    case 0x21:     //  AND (Indirect, X)
       data = read_indirect_x(a);
       run_and(data);
       return 6;
 
-    case 0x24:     //  BIT (Zero Page)
+    case 0x24:     //  BIT Zero Page
       data = read_zero_page(a);
       run_bit(data);
       return 3;
 
-    case 0x25:     //  AND (Zero Page)
+    case 0x25:     //  AND Zero Page
       data = read_zero_page(a);
       run_and(data);
       return 3;
 
-    case 0x26:     //  ROL (Zero Page)
+    case 0x26:     //  ROL Zero Page
       data = read_zero_page(a);
       run_rol_memory(a, data);
       return 5;
@@ -229,29 +229,29 @@ int M6502::execute_instruction()
       status.reg_p = pop();
       return 4;
 
-    case 0x29:     //  AND (Immediate)
+    case 0x29:     //  AND #Immediate
       data = read_immediate();
       run_and(data);
       return 2;
 
-    case 0x2a:     //  ROL (Accumulator)
+    case 0x2a:     //  ROL <Accumulator>
       reg_a = reg_a << 1;
       set_flags(reg_a);
       reg_a |= status.c;
       status.z = reg_a == 0;
       return 2;
 
-    case 0x2c:     //  BIT (Absolute)
+    case 0x2c:     //  BIT Absolute
       data = read_absolute(a);
       run_bit(data);
       return 4;
 
-    case 0x2d:     //  AND (Absolute)
+    case 0x2d:     //  AND Absolute
       data = read_absolute(a);
       run_and(data);
       return 4;
 
-    case 0x2e:     //  ROR (Absolute)
+    case 0x2e:     //  ROR Absolute
       data = read_absolute(a);
       run_ror_memory(a, data);
       return 6;
@@ -269,17 +269,17 @@ int M6502::execute_instruction()
 
       return 2;
 
-    case 0x31:     //  AND ((Indirect), Y)
+    case 0x31:     //  AND (Indirect), Y
       data = read_indirect_y(a);
       run_and(data);
       return same_page(a) ? 5 : 6;
 
-    case 0x35:     //  AND (Zero Page, X)
+    case 0x35:     //  AND Zero Page, X
       data = read_zero_page_x(a);
       run_and(data);
       return 4;
 
-    case 0x36:     //  ROR (Zero Page, X)
+    case 0x36:     //  ROR Zero Page, X
       data = read_zero_page_x(a);
       run_ror_memory(a, data);
       return 6;
@@ -288,17 +288,17 @@ int M6502::execute_instruction()
       status.c = 1;
       return 2;
 
-    case 0x39:     //  AND (Absolute, Y)
+    case 0x39:     //  AND Absolute, Y
       data = read_absolute_y(a);
       run_and(data);
       return same_page(a) ? 4 : 5;
 
-    case 0x3d:     //  AND (Absolute, X)
+    case 0x3d:     //  AND Absolute, X
       data = read_absolute_x(a);
       run_and(data);
       return same_page(a) ? 4 : 5;
 
-    case 0x3e:     //  ROR (Absolute, X)
+    case 0x3e:     //  ROR Absolute, X
       data = read_absolute_x(a);
       run_ror_memory(a, data);
       return 7;
@@ -309,17 +309,17 @@ int M6502::execute_instruction()
       pc |= pop() << 8;
       return 6;
 
-    case 0x41:     //  EOR ((Indirect, X))
+    case 0x41:     //  EOR (Indirect, X)
       data = read_indirect_x(a);
       run_eor(data);
       return 6;
 
-    case 0x45:     //  EOR (Zero Page)
+    case 0x45:     //  EOR Zero Page
       data = read_zero_page(a);
       run_eor(data);
       return 3;
 
-    case 0x46:     //  LSR (Zero Page)
+    case 0x46:     //  LSR Zero Page
       data = read_zero_page(a);
       run_lsr_memory(a, data);
       return 5;
@@ -328,28 +328,28 @@ int M6502::execute_instruction()
       push(reg_a);
       return 3;
 
-    case 0x49:     //  EOR (Immediate)
+    case 0x49:     //  EOR #Immediate
       data = read_immediate();
       run_eor(data);
       return 2;
 
-    case 0x4a:     //  LSR (Accumulator)
+    case 0x4a:     //  LSR <Accumulator>
       status.c = (reg_a & 1) != 0;
       reg_a = (reg_a >> 1) & 0xff;
       status.z = reg_a == 0;
       status.n = (reg_a & 0x80) != 0;
       return 2;
 
-    case 0x4c:     //  JMP (Absolute)
+    case 0x4c:     //  JMP Absolute
       pc = read_address();
       return 3;
 
-    case 0x4d:     //  EOR (Absolute)
+    case 0x4d:     //  EOR Absolute
       data = read_absolute(a);
       run_eor(data);
       return 4;
 
-    case 0x4e:     //  LSR (Absolute)
+    case 0x4e:     //  LSR Absolute
       data = read_absolute(a);
       run_lsr_memory(a, data);
       return 6;
@@ -367,17 +367,17 @@ int M6502::execute_instruction()
 
       return 2;
 
-    case 0x51:     //  EOR ((Indirect), Y)
+    case 0x51:     //  EOR (Indirect), Y
       data = read_indirect_y(a);
       run_eor(data);
       return same_page(a) ? 5 : 6;
 
-    case 0x55:     //  EOR (Zero Page, X)
+    case 0x55:     //  EOR Zero Page, X
       data = read_zero_page_x(a);
       run_eor(data);
       return 4;
 
-    case 0x56:     //  LSR (Zero Page, X)
+    case 0x56:     //  LSR Zero Page, X
       data = read_zero_page_x(a);
       run_lsr_memory(a, data);
       return 6;
@@ -386,17 +386,17 @@ int M6502::execute_instruction()
       status.i = 0;
       return 2;
 
-    case 0x59:     //  EOR (Absolute, Y)
+    case 0x59:     //  EOR Absolute, Y
       data = read_absolute_y(a);
       run_eor(data);
       return same_page(a) ? 4 : 5;
 
-    case 0x5d:     //  EOR (Absolute, X)
+    case 0x5d:     //  EOR Absolute, X
       data = read_absolute_x(a);
       run_eor(data);
       return same_page(a) ? 4 : 5;
 
-    case 0x5e:     //  LSR (Absolute, X)
+    case 0x5e:     //  LSR Absolute, X
       data = read_absolute_x(a);
       run_lsr_memory(a, data);
       return 7;
@@ -406,17 +406,17 @@ int M6502::execute_instruction()
       pc |= pop() << 8;
       return 6;
 
-    case 0x61:     //  ADC ((Indirect, X))
+    case 0x61:     //  ADC (Indirect, X)
       data = read_indirect_x(a);
       run_adc(data);
       return 6;
 
-    case 0x65:     //  ADC (ZeroPage)
+    case 0x65:     //  ADC ZeroPage
       data = read_zero_page(a);
       run_adc(data);
       return 3;
 
-    case 0x66:     //  ROR (Zero Page)
+    case 0x66:     //  ROR Zero Page
       data = read_zero_page(a);
       run_ror_memory(a, data);
       return 5;
@@ -425,12 +425,12 @@ int M6502::execute_instruction()
       reg_a = pop();
       return 4;
 
-    case 0x69:     //  ADC (Immediate)
+    case 0x69:     //  ADC #Immediate
       data = read_immediate();
       run_adc(data);
       return 2;
 
-    case 0x6a:     //  ROR (Accumulator)
+    case 0x6a:     //  ROR <Accumulator>
       run_ror();
       return 2;
 
@@ -439,12 +439,12 @@ int M6502::execute_instruction()
       pc = memory_bus->read16(pc);
       return 5;
 
-    case 0x6d:     //  ADC (Absolute)
+    case 0x6d:     //  ADC Absolute
       data = read_absolute(a);
       run_adc(data);
       return 4;
 
-    case 0x6e:     //  ROL (Absolute)
+    case 0x6e:     //  ROL Absolute
       data = read_absolute(a);
       run_rol_memory(a, data);
       return 6;
@@ -462,17 +462,17 @@ int M6502::execute_instruction()
 
       return 2;
 
-    case 0x71:     //  ADC ((Indirect), Y)
+    case 0x71:     //  ADC (Indirect), Y
       data = read_indirect_y(a);
       run_adc(data);
       return same_page(a) ? 5 : 6;
 
-    case 0x75:     //  ADC (ZeroPage, X)
+    case 0x75:     //  ADC ZeroPage, X
       data = read_zero_page_x(a);
       run_adc(data);
       return 4;
 
-    case 0x76:     //  ROL (Zero Page, X)
+    case 0x76:     //  ROL Zero Page, X
       data = read_zero_page_x(a);
       run_rol_memory(a, data);
       return 6;
@@ -481,38 +481,38 @@ int M6502::execute_instruction()
       status.i = 1;
       return 2;
 
-    case 0x79:     //  ADC (Absolute, Y)
+    case 0x79:     //  ADC Absolute, Y
       data = read_absolute_y(a);
       run_adc(data);
       return same_page(a) ? 4 : 5;
 
-    case 0x7d:     //  ADC (Absolute, X)
+    case 0x7d:     //  ADC Absolute, X
       data = read_absolute_x(a);
       run_adc(data);
       return same_page(a) ? 4 : 5;
 
-    case 0x7e:     //  ROL (Absolute, X)
+    case 0x7e:     //  ROL Absolute, X
       data = read_absolute_x(a);
       run_rol_memory(a, data);
       return 7;
 
-    case 0x81:     //  STA ((Indirect, X))
+    case 0x81:     //  STA (Indirect, X)
       store_indirect_x(reg_a);
       return 6;
 
-    case 0x84:     //  STY (Zero Page)
+    case 0x84:     //  STY Zero Page
       store_zero_page(reg_y);
       return 3;
 
-    case 0x85:     //  STA (Zero Page)
+    case 0x85:     //  STA Zero Page
       store_zero_page(reg_a);
       return 3;
 
-    case 0x86:     //  STX (Zero Page)
+    case 0x86:     //  STX Zero Page
       store_zero_page(reg_x);
       return 3;
 
-    case 0x88:     //  DEY (Implied)
+    case 0x88:     //  DEY <Implied>
       reg_y--;
       set_flags(reg_y);
       return 2;
@@ -522,15 +522,15 @@ int M6502::execute_instruction()
       set_load_flags(reg_a);
       return 2;
 
-    case 0x8c:     //  STY (Absolute)
+    case 0x8c:     //  STY Absolute
       store_absolute(reg_y);
       return 4;
 
-    case 0x8d:     //  STA (Absolute)
+    case 0x8d:     //  STA Absolute
       store_absolute(reg_a);
       return 4;
 
-    case 0x8e:     //  STX (Absolute)
+    case 0x8e:     //  STX Absolute
       store_absolute(reg_x);
       return 4;
 
@@ -546,19 +546,19 @@ int M6502::execute_instruction()
 
       return 2;
 
-    case 0x91:     //  STA ((Indirect), Y)
+    case 0x91:     //  STA (Indirect), Y
       store_indirect_y(reg_a);
       return 6;
 
-    case 0x94:     //  STY (Zero Page, X)
+    case 0x94:     //  STY Zero Page, X
       store_zero_page_x(reg_y);
       return 4;
 
-    case 0x95:     //  STA (Zero Page, X)
+    case 0x95:     //  STA Zero Page, X
       store_zero_page_x(reg_a);
       return 4;
 
-    case 0x96:     //  STX (Zero Page, Y)
+    case 0x96:     //  STX Zero Page, Y
       store_zero_page_y(reg_x);
       return 4;
 
@@ -567,7 +567,7 @@ int M6502::execute_instruction()
       set_load_flags(reg_a);
       return 2;
 
-    case 0x99:     //  STA (Absolute, Y)
+    case 0x99:     //  STA Absolute, Y
       store_absolute_y(reg_a);
       return 5;
 
@@ -575,37 +575,37 @@ int M6502::execute_instruction()
       sp = reg_x;
       return 2;
 
-    case 0x9d:     //  STA (Absolute, X)
+    case 0x9d:     //  STA Absolute, X
       store_absolute_x(reg_a);
       return 5;
 
-    case 0xa0:     //  LDY (Immediate)
+    case 0xa0:     //  LDY #Immediate
       reg_y = read_immediate();
       set_load_flags(reg_y);
       return 2;
 
-    case 0xa1:     //  LDA ((Indirect, X))
+    case 0xa1:     //  LDA (Indirect, X)
       data = read_indirect_x(a);
       reg_a = data;
       set_load_flags(reg_a);
       return 6;
 
-    case 0xa2:     //  LDX (Immediate)
+    case 0xa2:     //  LDX #Immediate
       reg_x = read_immediate();
       set_load_flags(reg_x);
       return 2;
 
-    case 0xa4:     //  LDY (Zero Page)
+    case 0xa4:     //  LDY Zero Page
       reg_y = read_zero_page(a);
       set_load_flags(reg_y);
       return 3;
 
-    case 0xa5:     //  LDA (Zero Page)
+    case 0xa5:     //  LDA Zero Page
       reg_a = read_zero_page(a);
       set_load_flags(reg_a);
       return 3;
 
-    case 0xa6:     //  LDX (Zero Page)
+    case 0xa6:     //  LDX Zero Page
       reg_x = read_zero_page(a);
       set_load_flags(reg_x);
       return 3;
@@ -615,7 +615,7 @@ int M6502::execute_instruction()
       set_load_flags(reg_y);
       return 2;
 
-    case 0xa9:     //  LDA (Immediate)
+    case 0xa9:     //  LDA #Immediate
       data = read_immediate();
       reg_a = data;
       set_load_flags(reg_a);
@@ -626,17 +626,17 @@ int M6502::execute_instruction()
       set_load_flags(reg_x);
       return 2;
 
-    case 0xac:     //  LDY (Absolute)
+    case 0xac:     //  LDY Absolute
       reg_y = read_absolute(a);
       set_load_flags(reg_y);
       return 4;
 
-    case 0xad:     //  LDA (Absolute)
+    case 0xad:     //  LDA Absolute
       reg_a = read_absolute(a);
       set_load_flags(reg_a);
       return 4;
 
-    case 0xae:     //  LDX (Absolute)
+    case 0xae:     //  LDX Absolute
       reg_x = read_absolute(a);
       set_load_flags(reg_x);
       return 4;
@@ -653,22 +653,22 @@ int M6502::execute_instruction()
 
       return 2;
 
-    case 0xb1:     //  LDA ((Indirect), Y)
+    case 0xb1:     //  LDA (Indirect), Y
       reg_a = read_indirect_y(a);
       set_load_flags(reg_a);
       return same_page(a) ? 5 : 6;
 
-    case 0xb4:     //  LDY (Zero Page, X)
+    case 0xb4:     //  LDY Zero Page, X
       reg_y = read_zero_page_x(a);
       set_load_flags(reg_y);
       return 4;
 
-    case 0xb5:     //  LDA (Zero Page, X)
+    case 0xb5:     //  LDA Zero Page, X
       reg_a = read_zero_page_x(a);
       set_load_flags(reg_a);
       return 4;
 
-    case 0xb6:     //  LDX (Zero Page, Y)
+    case 0xb6:     //  LDX Zero Page, Y
       reg_x = read_zero_page_y();
       set_load_flags(reg_x);
       return 4;
@@ -677,7 +677,7 @@ int M6502::execute_instruction()
       status.v = 0;
       return 2;
 
-    case 0xb9:     //  LDA (Absolute, Y)
+    case 0xb9:     //  LDA Absolute, Y
       reg_a = read_absolute_y(a);
       set_load_flags(reg_a);
       return same_page(a) ? 4 : 5;
@@ -687,52 +687,52 @@ int M6502::execute_instruction()
       set_flags(reg_x);
       return 2;
 
-    case 0xbc:     //  LDY (Absolute, X)
+    case 0xbc:     //  LDY Absolute, X
       reg_y = read_absolute_x(a);
       set_load_flags(reg_y);
       return same_page(a) ? 4 : 5;
 
-    case 0xbd:     //  LDA (Absolute, X)
+    case 0xbd:     //  LDA Absolute, X
       reg_a = read_absolute_x(a);
       set_load_flags(reg_a);
       return same_page(a) ? 4 : 5;
 
-    case 0xbe:     //  LDX (Absolute, Y)
+    case 0xbe:     //  LDX Absolute, Y
       reg_x = read_absolute_y(a);
       set_load_flags(reg_x);
       return same_page(a) ? 4 : 5;
 
-    case 0xc0:     //  CPY (Immediate)
+    case 0xc0:     //  CPY Immediate
       data = read_immediate();
       run_compare(reg_y, data);
       return 2;
 
-    case 0xc1:     //  CMP ((Indirect, X))
+    case 0xc1:     //  CMP (Indirect, X)
       data = read_indirect_x(a);
       run_compare(reg_a, data);
       return 6;
 
-    case 0xc4:     //  CPY (Zero Page)
+    case 0xc4:     //  CPY Zero Page
       data = read_zero_page(a);
       run_compare(reg_y, data);
       return 3;
 
-    case 0xc5:     //  CMP (Zero Page)
+    case 0xc5:     //  CMP Zero Page
       data = read_zero_page(a);
       run_compare(reg_a, data);
       return 3;
 
-    case 0xc6:     //  DEC (Zero Page)
+    case 0xc6:     //  DEC Zero Page
       data = read_zero_page(a);
       run_dec_memory(a, data);
       return 5;
 
-    case 0xc8:     //  INY (Implied)
+    case 0xc8:     //  INY <Implied>
       reg_y = (reg_y + 1) & 0xff;
       set_load_flags(reg_y);
       return 2;
 
-    case 0xc9:     //  CMP (Immediate)
+    case 0xc9:     //  CMP #Immediate
       data = read_immediate();
       run_compare(reg_a, data);
       return 3;
@@ -742,17 +742,17 @@ int M6502::execute_instruction()
       set_load_flags(reg_x);
       return 2;
 
-    case 0xcc:     //  CPY (Absolute)
+    case 0xcc:     //  CPY Absolute
       data = read_absolute(a);
       run_compare(reg_y, data);
       return 4;
 
-    case 0xcd:     //  CMP (Absolute)
+    case 0xcd:     //  CMP Absolute
       data = read_absolute(a);
       run_compare(reg_a, data);
       return 4;
 
-    case 0xce:     //  DEC (Absolute)
+    case 0xce:     //  DEC Absolute
       data = read_absolute(a);
       run_dec_memory(a, data);
       return 6;
@@ -769,17 +769,17 @@ int M6502::execute_instruction()
 
       return 2;
 
-    case 0xd1:     //  CMP ((Indirect), Y)
+    case 0xd1:     //  CMP (Indirect), Y
       data = read_indirect_y(a);
       run_compare(reg_a, data);
       return same_page(a) ? 5 : 6;
 
-    case 0xd5:     //  CMP (Zero Page, X)
+    case 0xd5:     //  CMP Zero Page, X
       data = read_zero_page_x(a);
       run_compare(reg_a, data);
       return 4;
 
-    case 0xd6:     //  DEC (Zero Page, X)
+    case 0xd6:     //  DEC Zero Page, X
       data = read_zero_page_x(a);
       run_dec_memory(a, data);
       return 6;
@@ -788,42 +788,42 @@ int M6502::execute_instruction()
       status.d = 0;
       return 2;
 
-    case 0xd9:     //  CMP (Absolute, Y)
+    case 0xd9:     //  CMP Absolute, Y
       data = read_absolute_y(a);
       run_compare(reg_a, data);
       return same_page(a) ? 4 : 5;
 
-    case 0xdd:     //  CMP (Absolute, X)
+    case 0xdd:     //  CMP Absolute, X
       data = read_absolute_x(a);
       run_compare(reg_a, data);
       return same_page(a) ? 4 : 5;
 
-    case 0xde:     //  DEC (Absolute, X)
+    case 0xde:     //  DEC Absolute, X
       data = read_absolute_x(a);
       run_dec_memory(a, data);
       return 7;
 
-    case 0xe0:     //  CPX (Immediate)
+    case 0xe0:     //  CPX #Immediate
       data = read_immediate();
       run_compare(reg_x, data);
       return 2;
 
-    case 0xe1:     //  SBC ((Indirect, X))
+    case 0xe1:     //  SBC (Indirect, X)
       data = read_indirect_x(a);
       run_sbc(data);
       return 6;
 
-    case 0xe4:     //  CPX (Zero Page)
+    case 0xe4:     //  CPX Zero Page
       data = read_zero_page(a);
       run_compare(reg_x, data);
       return 3;
 
-    case 0xe5:     //  SBC (Zero Page)
+    case 0xe5:     //  SBC Zero Page
       data = read_zero_page(a);
       run_sbc(data);
       return 3;
 
-    case 0xe6:     //  INC (Zero Page)
+    case 0xe6:     //  INC Zero Page
       data = read_zero_page(a);
       run_inc_memory(a, data);
       return 5;
@@ -833,7 +833,7 @@ int M6502::execute_instruction()
       set_load_flags(reg_x);
       return 2;
 
-    case 0xe9:     //  SBC (Immediate)
+    case 0xe9:     //  SBC #Immediate
       data = read_immediate();
       run_sbc(data);
       return 2;
@@ -841,17 +841,17 @@ int M6502::execute_instruction()
     case 0xea:     //  NOP
       return 2;
 
-    case 0xec:     //  CPX (Absolute)
+    case 0xec:     //  CPX Absolute
       data = read_absolute(a);
       run_compare(reg_x, data);
       return 4;
 
-    case 0xed:     //  SBC (Absolute)
+    case 0xed:     //  SBC Absolute
       data = read_absolute(a);
       run_sbc(data);
       return 4;
 
-    case 0xee:     //  INC (Absolute)
+    case 0xee:     //  INC Absolute
       data = read_absolute(a);
       run_inc_memory(a, data);
       return 6;
@@ -868,17 +868,17 @@ int M6502::execute_instruction()
 
       return 2;
 
-    case 0xf1:     //  SBC ((Indirect), Y)
+    case 0xf1:     //  SBC (Indirect), Y
       data = read_indirect_y(a);
       run_sbc(data);
       return same_page(a) ? 5 : 6;
 
-    case 0xf5:     //  SBC (Zero Page, X)
+    case 0xf5:     //  SBC Zero Page, X
       data = read_zero_page_x(a);
       run_sbc(data);
       return 4;
 
-    case 0xf6:     //  INC (Zero Page, X)
+    case 0xf6:     //  INC Zero Page, X
       data = read_zero_page_x(a);
       run_inc_memory(a, data);
       return 6;
@@ -887,17 +887,17 @@ int M6502::execute_instruction()
       status.d = 1;
       return 2;
 
-    case 0xf9:     //  SBC (Absolute, Y)
+    case 0xf9:     //  SBC Absolute, Y
       data = read_absolute_y(a);
       run_sbc(data);
       return same_page(a) ? 4 : 5;
 
-    case 0xfd:     //  SBC (Absolute, X)
+    case 0xfd:     //  SBC Absolute, X
       data = read_absolute_x(a);
       run_sbc(data);
       return same_page(a) ? 4 : 5;
 
-    case 0xfe:     //  INC (Absolute, X)
+    case 0xfe:     //  INC Absolute, X
       data = read_absolute_x(a);
       run_inc_memory(a, data);
       return 7;
