@@ -18,7 +18,7 @@ OBJECTS= \
   Television.o \
   TelevisionNull.o \
   TelevisionSDL.o \
-  VNC.o
+  TelevisionVNC.o
 
 default: $(OBJECTS)
 	$(CXX) -o ../moln_spelare ../src/moln_spelare.cxx \

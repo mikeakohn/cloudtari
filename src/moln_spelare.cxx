@@ -19,6 +19,7 @@
 #include "ROM.h"
 #include "TelevisionNull.h"
 #include "TelevisionSDL.h"
+#include "TelevisionVNC.h"
 #include "TIA.h"
 
 int main(int argc, char *argv[])
@@ -46,6 +47,11 @@ int main(int argc, char *argv[])
   if (strcmp(argv[2], "sdl") == 0)
   {
     television = new TelevisionSDL();
+  }
+    else
+  if (strcmp(argv[2], "vnc") == 0)
+  {
+    television = new TelevisionVNC();
   }
     else
   if (strcmp(argv[2], "debug") == 0)
