@@ -27,26 +27,23 @@ public:
   uint8_t read_memory(int address);
   void write_memory(int address, uint8_t value);
   void build_playfield();
+  void build_player_0();
+  void build_player_1();
   void clock();
   void clock(int ticks);
-  bool draw_playfield_fg();
-  bool draw_player_0();
-  bool draw_player_1();
-  bool draw_missile_0();
-  bool draw_missile_1();
-  bool draw_ball();
-  void draw_playfield_bg();
-  void draw_pixel();
   void dump();
   bool wait_for_hsync() { return write_regs[WSYNC] != 0; }
 
-private:
-  int get_x() { return pos_x - 68; }
-  int get_y() { return pos_y - 37; }
-
-  struct GraphicsObject
+  int compute_offset(uint8_t value)
   {
-    GraphicsObject() : data{0}, current_pixel{1} { }
+    int8_t offset = (int8_t)value;
+    return offset >> 4;
+  }
+
+private:
+  struct Playfield
+  {
+    Playfield() : data{0}, current_pixel{1} { }
     void reset() { current_pixel = 1; }
     bool is_pixel_on() { return (data & current_pixel) != 0; }
 
@@ -64,6 +61,42 @@ private:
     uint64_t current_pixel;
   };
 
+  struct Player
+  {
+    Player() : data{0}, scale{1}, start_pos{0}, offset{0} { }
+
+    void reset() { start_pos = 0; }
+    void set_position(int pos_x) { start_pos = pos_x; }
+    void set_scale(int value) { scale = value; }
+    void set_offset(int value) { next_offset = value; }
+    void apply_offset() { offset = next_offset; }
+    void clear_offset() { offset = 0; next_offset = 0; }
+
+    bool is_pixel_on(int pos_x)
+    {
+      int x = pos_x + offset;
+      if (x < 68) { return false; }
+      x = (x - start_pos) / scale;
+      if (x >= 7) { return false; }
+      return (data & (1 << x)) != 0;
+    }
+
+    uint8_t data;
+    int scale, start_pos, offset, next_offset;
+  };
+
+  int get_x() { return pos_x - 68; }
+  int get_y() { return pos_y - 37; }
+  void player_size(Player &player, int value);
+  bool draw_playfield_fg();
+  bool draw_player_0();
+  bool draw_player_1();
+  bool draw_missile_0();
+  bool draw_missile_1();
+  bool draw_ball();
+  void draw_playfield_bg();
+  void draw_pixel();
+
   struct Colors
   {
     uint32_t playfield;
@@ -77,7 +110,9 @@ private:
   int pos_x;
   int pos_y;
 
-  GraphicsObject playfield;
+  Playfield playfield;
+  Player player_0;
+  Player player_1;
 
   uint8_t write_regs[64];
   uint8_t read_regs[16];
