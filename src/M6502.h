@@ -257,9 +257,10 @@ private:
 
   void run_ror_memory(int address, int data)
   {
+    int c = status.c;
     status.c = data & 1;
     data = data >> 1;
-    data |= status.c << 7;
+    data |= c << 7;
     status.z = data == 0;
     status.n = (data & 0x80) != 0;
     memory_bus->write(address, data);
@@ -267,18 +268,20 @@ private:
 
   void run_ror()
   {
+    int c = status.c;
     status.c = reg_a & 1;
     reg_a = reg_a >> 1;
-    reg_a |= status.c << 7;
+    reg_a |= c << 7;
     status.z = reg_a == 0;
     status.n = (reg_a & 0x80) != 0;
   }
 
   void run_rol_memory(int address, int data)
   {
+    int c = status.c;
     data = data << 1;
     set_flags(data);
-    data |= status.c;
+    data |= c;
     status.z = data == 0;
     memory_bus->write(address, data);
   }
@@ -292,8 +295,10 @@ private:
 
   void run_lsr_memory(int address, int data)
   {
-    data = data >> 1;
-    set_flags(data);
+    status.c = data & 1;
+    data = (data >> 1) & 0xff;
+    status.z = data == 0;
+    status.n = (data & 0x80) != 0;
     memory_bus->write(address, data);
   }
 

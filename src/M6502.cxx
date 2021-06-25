@@ -84,7 +84,7 @@ int M6502::execute_instruction()
   int address = pc++;
   uint8_t opcode = memory_bus->read(address);
   int cycles = 0;
-  int a, b, data;
+  int a, b, c, data;
   int8_t offset;
 
   if (debug)
@@ -235,9 +235,10 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x2a:     //  ROL <Accumulator>
+      c = status.c;
       reg_a = reg_a << 1;
       set_flags(reg_a);
-      reg_a |= status.c;
+      reg_a |= c;
       status.z = reg_a == 0;
       return 2;
 
