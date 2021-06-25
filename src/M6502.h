@@ -188,8 +188,7 @@ private:
   {
     if (status.d == 0)
     {
-      reg_a = reg_a - data - (status.c ^ 1);
-
+      reg_a = ((status.c << 8) | reg_a) - data;
       status.c = reg_a > 0xff;
       reg_a &= 0xff;
       status.z = reg_a == 0;
@@ -233,19 +232,19 @@ private:
   void run_and(int data)
   {
     reg_a = reg_a & data;
-    set_flags(reg_a);
+    set_load_flags(reg_a);
   }
 
   void run_or(int data)
   {
     reg_a = reg_a ^ data;
-    set_flags(reg_a);
+    set_load_flags(reg_a);
   }
 
   void run_eor(int data)
   {
     reg_a = reg_a ^ data;
-    set_flags(reg_a);
+    set_load_flags(reg_a);
   }
 
   void run_bit(int data)
@@ -301,14 +300,16 @@ private:
   void run_inc_memory(int address, int data)
   {
     data++;
-    set_flags(data);
+    data &= 0xff;
+    set_load_flags(data);
     memory_bus->write(address, data);
   }
 
   void run_dec_memory(int address, int data)
   {
     data--;
-    set_flags(data);
+    data &= 0xff;
+    set_load_flags(data);
     memory_bus->write(address, data);
   }
 
@@ -324,16 +325,22 @@ private:
     memory_bus->write(address, data);
   }
 
-  void store_absolute_x(int data)
+  void store_absolute_x(int data, int &cycles)
   {
-    int address = memory_bus->read16(pc) + reg_x;
+    int a = memory_bus->read16(pc);
+    cycles = 4;
+    int address = a + reg_x;
+    if (!same_page(address, a)) { cycles++; }
     pc += 2;
     memory_bus->write(address, data);
   }
 
-  void store_absolute_y(int data)
+  void store_absolute_y(int data, int &cycles)
   {
-    int address = memory_bus->read16(pc) + reg_y;
+    int a = memory_bus->read16(pc);
+    cycles = 4;
+    int address = a + reg_y;
+    if (!same_page(address, a)) { cycles++; }
     pc += 2;
     memory_bus->write(address, data);
   }

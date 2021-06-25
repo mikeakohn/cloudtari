@@ -83,7 +83,7 @@ int M6502::execute_instruction()
 {
   int address = pc++;
   uint8_t opcode = memory_bus->read(address);
-  //int cycles = 0;
+  int cycles = 0;
   int a, b, data;
   int8_t offset;
 
@@ -568,16 +568,16 @@ int M6502::execute_instruction()
       return 2;
 
     case 0x99:     //  STA Absolute, Y
-      store_absolute_y(reg_a);
-      return 5;
+      store_absolute_y(reg_a, cycles);
+      return cycles;
 
     case 0x9a:     //  TXS
       sp = reg_x;
       return 2;
 
     case 0x9d:     //  STA Absolute, X
-      store_absolute_x(reg_a);
-      return 5;
+      store_absolute_x(reg_a, cycles);
+      return cycles;
 
     case 0xa0:     //  LDY #Immediate
       reg_y = read_immediate();
@@ -905,13 +905,6 @@ int M6502::execute_instruction()
     default:
       illegal_instruction(opcode);
   }
-
-#if 0
-  PC++;
-  if (count_cycles==1) cycles++;
-
-  bus.clock(cycles);
-#endif
 
   return 0;
 }
