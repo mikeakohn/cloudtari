@@ -109,18 +109,11 @@ printf("REFP0 %d\n", value);
       break;
     case RESP0:
       // Reset player 0 (aka, start drawing).
-//if (pos_x > 68)
-printf("RESP0 player 0: %d, %d  (value=%d)\n", pos_x, pos_y, value);
-      player_0.set_position(pos_x);
-      //player_0.set_position(100);
+      player_0.set_position();
       break;
     case RESP1:
       // Reset player 1 (aka, start drawing).
-//if (pos_x > 68)
-printf("RESP1 player 1: %d, %d  (value=%d)\n", pos_x, pos_y, value);
-      player_1.set_position(pos_x);
-//if (pos_y != 13) { exit(1); }
-      //player_1.set_position(100);
+      player_1.set_position();
       break;
     case RESM0:
       // Reset missile 0.
@@ -136,7 +129,6 @@ printf("RESP1 player 1: %d, %d  (value=%d)\n", pos_x, pos_y, value);
     case AUDF0:
       break;
     case AUDF1:
-printf("AUDF1 (%d, %d)\n", pos_x, pos_y);
       break;
     case AUDV0:
     case AUDV1:
@@ -153,11 +145,11 @@ printf("GRP1 %02x (%d, %d)\n", value, pos_x, pos_y);
       break;
     case HMP0:
       player_0.set_offset(compute_offset(value));
-printf("HMP0  %d offset=%d (%d,%d)\n", value, player_0.next_offset, pos_x, pos_y);
+printf("HMP0  0x%02x offset=%d (%d,%d)\n", value, player_0.next_offset, pos_x, pos_y);
       break;
     case HMP1:
       player_1.set_offset(compute_offset(value));
-printf("HMP1  %d offset=%d (%d,%d)\n", value, player_1.next_offset, pos_x, pos_y);
+printf("HMP1  0x%02x offset=%d (%d,%d)\n", value, player_1.next_offset, pos_x, pos_y);
       break;
     case HMM0:
       break;
@@ -171,8 +163,6 @@ printf("HMOVE %d\n", value);
     case HMCLR:
 printf("HMCLR %d\n", value);
       // Clear motion registers.
-      //write_regs[HMP0] = 0;
-      //write_regs[HMP1] = 0;
       player_0.clear_offset();
       player_1.clear_offset();
       write_regs[HMM0] = 0;
@@ -268,14 +258,8 @@ void TIA::clock()
 
   pos_x++;
 
-  // Every 4 screen pixels, increment playfield pixel.
-  //if (((pos_x - 68) % 4) == 0) { playfield.next_pixel(); }
-
   if (pos_x == 68 + 160)
   {
-//player_0.reset();
-//player_1.reset();
-
     write_regs[WSYNC] = 0;
     pos_x = 0;
     pos_y++;
@@ -291,6 +275,18 @@ void TIA::clock(int ticks)
   {
     clock();
     ticks--;
+  }
+
+  if (player_0.need_set_position())
+  {
+    player_0.set_position(pos_x);
+printf("player_0.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
+  }
+
+  if (player_1.need_set_position())
+  {
+    player_1.set_position(pos_x);
+printf("player_1.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
   }
 }
 

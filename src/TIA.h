@@ -34,7 +34,7 @@ public:
   void dump();
   bool wait_for_hsync() { return write_regs[WSYNC] != 0; }
 
-  int compute_offset(uint8_t value)
+  int compute_offset(int value)
   {
     int8_t offset = (int8_t)value;
     return offset >> 4;
@@ -63,14 +63,16 @@ private:
 
   struct Player
   {
-    Player() : data{0}, scale{1}, start_pos{0}, offset{0} { }
+    Player() : data{0}, set_pos{false}, scale{1}, start_pos{0}, offset{0} { }
 
     void reset() { start_pos = 0; }
-    void set_position(int pos_x) { start_pos = pos_x; }
+    void set_position() { set_pos = true; }
+    void set_position(int pos_x) { start_pos = pos_x; set_pos = false; }
     void set_scale(int value) { scale = value; }
     void set_offset(int value) { next_offset = value; }
     void apply_offset() { offset = next_offset; }
     void clear_offset() { offset = 0; next_offset = 0; }
+    bool need_set_position() { return set_pos; }
 
     bool is_pixel_on(int pos_x)
     {
@@ -82,6 +84,7 @@ private:
     }
 
     uint8_t data;
+    bool set_pos;
     int scale, start_pos, offset, next_offset;
   };
 
