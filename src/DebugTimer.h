@@ -38,7 +38,7 @@ public:
       if (address == start_address)
       {
         this->cycles += cycles;
-printf("cycles %d / %d\n", this->cycles, cycles);
+        //printf("cycles %d / %d\n", this->cycles, cycles);
         running = true;
       }
 
@@ -46,7 +46,7 @@ printf("cycles %d / %d\n", this->cycles, cycles);
     }
 
     this->cycles += cycles;
-printf("cycles %d / %d\n", this->cycles, cycles);
+    //printf("cycles %d / %d\n", this->cycles, cycles);
 
     if (address == end_address)
     {
