@@ -87,6 +87,11 @@ void MemoryBus::dump(int start, int end)
       printf("%04x:", n);
     }
 
+    if ((n % 8) == 0)
+    {
+      printf(" " );
+    }
+
     printf(" %02x", read(n));
 
     if ((n % 16) == 15)
