@@ -26,11 +26,26 @@ int main(int argc, char *argv[])
 {
   int cycles;
   bool debug = false;
+  bool step = false;
+  int step_address = -1;
+  int port = 5900;
   Television *television;
 
-  if (argc != 3)
+  // Used to see how many CPU cycles a set of instructions takes.
+  DebugTimer debug_timer;
+
+  if (argc < 3 || argc > 5)
   {
-    printf("Usage: %s <gamefile.bin> <sdl/null>\n", argv[0]);
+    printf(
+      "Usage: %s <gamefile.bin> <null/sdl/vnc/debug/break/timer/step>\n"
+      "          null\n"
+      "          sdl\n"
+      "          vnc <port>\n"
+      "          debug\n"
+      "          break <address>\n"
+      "          timer <start_address> <end_address>\n"
+      "          step <start_address>\n",
+      argv[0]);
     exit(0);
   }
 
@@ -52,6 +67,10 @@ int main(int argc, char *argv[])
   if (strcmp(argv[2], "vnc") == 0)
   {
     television = new TelevisionVNC();
+
+    if (argc > 3) { port = atoi(argv[3]); }
+
+    television->set_port(port);
   }
     else
   if (strcmp(argv[2], "debug") == 0)
@@ -61,14 +80,42 @@ int main(int argc, char *argv[])
     m6502->set_debug();
   }
     else
+  if (strcmp(argv[2], "break") == 0)
+  {
+    television = new TelevisionVNC();
+
+    int address = 0xf000;
+    if (argc > 3) { address = atoi(argv[3]); }
+    m6502->set_breakpoint(address);
+  }
+    else
+  if (strcmp(argv[2], "timer") == 0)
+  {
+    television = new TelevisionNull();
+    debug = true;
+    m6502->set_debug();
+
+    int address_start, address_end;
+
+    if (argc > 3) { address_start = strtol(argv[3], NULL, 0); }
+    if (argc > 4) { address_end = strtol(argv[4], NULL, 0); }
+
+    debug_timer.set(address_start, address_end);
+  }
+    else
+  if (strcmp(argv[2], "step") == 0)
+  {
+    television = new TelevisionNull();
+    debug = true;
+    m6502->set_debug();
+
+    step_address = 0xf000;
+    if (argc > 3) { step_address = strtol(argv[3], NULL, 0); }
+  }
+    else
   {
     television = new TelevisionNull();
   }
-
-  if (debug) { m6502->set_debug(); }
-  //m6502->set_breakpoint(0xf060);
-  //m6502->set_breakpoint(0xf13d);
-  //m6502->set_breakpoint(0xf622);
 
   television->init();
 
@@ -78,14 +125,13 @@ int main(int argc, char *argv[])
 
   // memory_bus->dump(0xf000, 0xffff);
 
-#if 0
-  DebugTimer debug_timer;
-  debug_timer.set(0xf61b, 0xf643);
-  //debug_timer.set(0xf645, 0xf64a);
-#endif
-
   while (m6502->is_running())
   {
+    if (m6502->get_pc() == step_address)
+    {
+      step = true;
+    }
+
     if (tia->wait_for_hsync())
     {
       cycles = 1;
@@ -95,7 +141,6 @@ int main(int argc, char *argv[])
     {
       //int address = m6502->get_pc();
       cycles = m6502->step();
-
       //debug_timer.compute(address, cycles);
     }
 
@@ -123,15 +168,16 @@ int main(int argc, char *argv[])
     {
       case 1:
         pia->set_switch_reset();
-printf("reset down\n");
         break;
       case 2:
-printf("reset up\n");
         pia->clear_switch_reset();
         break;
     }
 
-    //television->clear_display();
+    if (step)
+    {
+      getchar();
+    }
   }
 
 #if 0

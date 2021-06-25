@@ -25,6 +25,7 @@ public:
   virtual void draw_pixel(int x, int y, uint32_t color) = 0;
   virtual bool refresh() = 0;
   virtual int handle_events() = 0;
+  virtual void set_port(int value) { };
 
 private:
 
