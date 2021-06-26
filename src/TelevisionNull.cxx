@@ -28,7 +28,7 @@ void TelevisionNull::clear_display()
 {
 }
 
-void TelevisionNull::draw_pixel(int x, int y, uint32_t color)
+void TelevisionNull::draw_pixel(int x, int y, uint8_t color)
 {
 }
 

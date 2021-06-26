@@ -13,7 +13,7 @@
 
 uint32_t ColorTable::get_color(int index)
 {
-  return colors[index >> 1];
+  return colors[(index >> 1) & 0x7f];
 }
 
 uint32_t ColorTable::colors[] =

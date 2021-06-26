@@ -19,15 +19,24 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include "ColorTable.h"
 #include "TelevisionVNC.h"
 
 TelevisionVNC::TelevisionVNC() :
-  socket_id(-1),
-  client(-1),
-  port(5900)
+  socket_id{-1},
+  client{-1},
+  port{5900},
+  needs_color_table{false}
 {
-  image_packet = (ImagePacket *)malloc(
-    sizeof(ImagePacket) + width * height * sizeof(uint32_t));
+  image_packet_length = sizeof(ImagePacket) + (width * height);
+  image_packet = (ImagePacket *)malloc(image_packet_length);
+
+  memset(image_packet, 0, image_packet_length);
+
+  image_packet->number_of_rectangles = htons(1);
+  image_packet->width = htons(width);
+  image_packet->height = htons(height);
+  image_packet->encoding_type = htonl(ENCODING_RAW);
 }
 
 TelevisionVNC::~TelevisionVNC()
@@ -74,23 +83,24 @@ int TelevisionVNC::init()
 
   fcntl(client, F_SETFL, O_NONBLOCK);
 
-  send_protocol_version();
+  if (send_protocol_version() != 0) { return -1; }
   if (get_client_protocol_version() != 0) { return -1; }
-  send_security();
+  if (send_security() != 0) { return -1; }
   if (get_client_init() != 0) { return -1; }
-  send_server_init();
+  if (send_server_init() != 0) { return -1; }
+  //if (send_color_table() != 0) { return -1; }
 
   return 0;
 }
 
 void TelevisionVNC::clear_display()
 {
-  const int length = width * height * 3;
+  const int length = width * height;
 
   memset(image_packet->data, 0, length);
 }
 
-void TelevisionVNC::draw_pixel(int x, int y, uint32_t color)
+void TelevisionVNC::draw_pixel(int x, int y, uint8_t color)
 {
   int pixel;
 
@@ -99,15 +109,19 @@ void TelevisionVNC::draw_pixel(int x, int y, uint32_t color)
 
   pixel = (y * width) + x;
 
-  image_packet->data[pixel + 0] = color;
-  image_packet->data[pixel + 1] = color;
-  image_packet->data[pixel + width + 0] = color;
-  image_packet->data[pixel + width + 1] = color;
+  if (pixel < width * height + width + 1)
+  { 
+    image_packet->data[pixel + 0] = color;
+    image_packet->data[pixel + 1] = color;
+    image_packet->data[pixel + width + 0] = color;
+    image_packet->data[pixel + width + 1] = color;
+  }
 }
 
 bool TelevisionVNC::refresh()
 {
   send_image_full();
+printf("refresh\n");
 
   return true;
 }
@@ -123,23 +137,23 @@ int TelevisionVNC::handle_events()
     uint8_t message_type = 0xff;
 
     vnc_recv(&message_type, 1);
-printf("data is waiting %02x\n", message_type);
 
     switch (message_type)
     {
       case 0:
-        printf("SetPixelFormat\n");
-        vnc_recv(buffer, 19);
+        printf("From Client: SetPixelFormat\n");
+        vnc_recv(buffer + 1, 19);
+        print_pixel_format(buffer);
         break;
       case 2:
-        printf("SetEncodings\n");
+        printf("From Client: SetEncodings\n");
         vnc_recv(buffer, 3);
         count = (buffer[1] << 8) | buffer[2];
 
         for (n = 0; n < count; n++) { vnc_recv(buffer, 4); }
         break;
       case 3:
-        printf("FramebufferUpdateRequest\n");
+        printf("From Client: FramebufferUpdateRequest\n");
         vnc_recv(buffer + 1, 9);
         send_image_update(
           (buffer[2] << 8) | buffer[3],
@@ -148,7 +162,7 @@ printf("data is waiting %02x\n", message_type);
           (buffer[8] << 8) | buffer[9]);
         break;
       case 4:
-        printf("KeyEvent\n");
+        printf("From Client: KeyEvent\n");
         vnc_recv(buffer + 1, 7);
         key =
           (buffer[4] << 24) |
@@ -173,11 +187,11 @@ printf("data is waiting %02x\n", message_type);
 
         break;
       case 5:
-        printf("PointerEvent\n");
+        printf("From Client: PointerEvent\n");
         vnc_recv(buffer + 1, 5);
         break;
       case 6:
-        printf("ClientCutText\n");
+        printf("From Client: ClientCutText\n");
         vnc_recv(buffer + 1, 7);
         count =
           (buffer[4] << 24) |
@@ -379,14 +393,16 @@ int TelevisionVNC::send_server_init()
   packet.height = htons(height);
   packet.bits_per_pixel = 32;
   packet.depth = 24;
-  packet.big_endian_flag = 1;
-  packet.true_colour_flag = 1;
-  packet.red_max = htons(255);
-  packet.green_max = htons(255);
-  packet.blue_max = htons(255);
-  packet.red_shift = 16;
-  packet.green_shift = 8;
-  packet.blue_shift = 0;
+  //packet.bits_per_pixel = 8;
+  //packet.depth = 8;
+  //packet.big_endian_flag = 1;
+  //packet.true_colour_flag = 1;
+  //packet.red_max = htons(255);
+  //packet.green_max = htons(255);
+  //packet.blue_max = htons(255);
+  //packet.red_shift = 16;
+  //packet.green_shift = 8;
+  //packet.blue_shift = 0;
   packet.name_length = htonl(8);
   memcpy(packet.name, "ATARI---", 8);
 
@@ -405,15 +421,92 @@ int TelevisionVNC::send_server_init()
   return 0;
 }
 
+int TelevisionVNC::send_color_table()
+{
+  struct
+  {
+    uint8_t message_type;
+    uint8_t padding;
+    uint16_t first_colour;
+    uint16_t number_of_colours;
+    uint16_t table[128 * 3];
+  } packet;
+
+  memset(&packet, 0, sizeof(packet));
+
+  if (sizeof(packet) != 768 + 6)
+  {
+    printf("Error: sizeof() error  %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
+  packet.message_type = 1;
+  packet.number_of_colours = htons(128);
+
+  for (int n = 0; n < 128; n++)
+  {
+    uint32_t color = ColorTable::get_color(n);
+    uint16_t red = color >> 16;
+    uint16_t green = (color >> 8) & 0xff;
+    uint16_t blue = color & 0xff;
+
+    int index = n * 3;
+    packet.table[index + 0] = htons(red);
+    packet.table[index + 1] = htons(green);
+    packet.table[index + 2] = htons(blue);
+  }
+
+  if (vnc_send((const uint8_t *)&packet, sizeof(packet)) != sizeof(packet))
+  {
+    printf("Error: Send packet %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
+  return 0;
+}
+
 int TelevisionVNC::send_image_full()
 {
+  if (vnc_send((const uint8_t *)image_packet, image_packet_length) != image_packet_length)
+  {
+    printf("Error: Send packet %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
   return 0;
 }
 
 int TelevisionVNC::send_image_update(int x, int y, int width, int height)
 {
+  if (needs_color_table)
+  {
+    if (send_color_table() != 0) { return -1; }
+    needs_color_table = false;
+  }
+
   printf("send_image_update(%d, %d, %d, %d)\n", x, y, width, height);
 
+  if (x == 0 && y == 0 && width == this->width && height == this->height)
+  {
+    send_image_full();
+  }
+
   return 0;
+}
+
+void TelevisionVNC::print_pixel_format(uint8_t *buffer)
+{
+  buffer += 4;
+
+  printf("  bits_per_pixel: %d\n", buffer[0]);
+  printf("           depth: %d\n", buffer[1]);
+  printf("      big_endian: %d\n", buffer[2]);
+  printf("     true_colour: %d\n", buffer[3]);
+  printf("         red_max: %d\n", (buffer[4] << 8) | buffer[5]);
+  printf("       green_max: %d\n", (buffer[6] << 8) | buffer[7]);
+  printf("        blue_max: %d\n", (buffer[8] << 8) | buffer[9]);
+  printf("       red_shift: %d\n", buffer[10]);
+  printf("     green_shift: %d\n", buffer[11]);
+  printf("      blue_shift: %d\n", buffer[12]);
 }
 

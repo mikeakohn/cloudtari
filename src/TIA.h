@@ -102,10 +102,10 @@ private:
 
   struct Colors
   {
-    uint32_t playfield;
-    uint32_t background;
-    uint32_t player_0;
-    uint32_t player_1;
+    uint8_t playfield;
+    uint8_t background;
+    uint8_t player_0;
+    uint8_t player_1;
   } colors;
 
   Television *television;

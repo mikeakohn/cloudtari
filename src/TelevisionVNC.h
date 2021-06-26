@@ -24,7 +24,7 @@ public:
 
   virtual int init();
   virtual void clear_display();
-  virtual void draw_pixel(int x, int y, uint32_t color);
+  virtual void draw_pixel(int x, int y, uint8_t color);
   virtual bool refresh();
   virtual int handle_events();
   virtual void set_port(int value) { port = value; };
@@ -39,18 +39,42 @@ private:
   int send_security();
   int get_client_init();
   int send_server_init();
+  int send_color_table();
   int send_image_full();
   int send_image_update(int x, int y, int width, int height);
+  void print_pixel_format(uint8_t *buffer);
 
   int socket_id;
   int client;
   int port;
 
+  bool needs_color_table;
+  int image_packet_length;
+
   struct ImagePacket
   {
-    uint8_t header[16];
-    uint32_t data[];
+    uint8_t message_type; 
+    uint8_t padding; 
+    uint16_t number_of_rectangles; 
+    uint16_t x;
+    uint16_t y;
+    uint16_t width;
+    uint16_t height;
+    int encoding_type;
+    uint8_t data[];
   } *image_packet;
+
+  enum
+  {
+    ENCODING_RAW = 0,
+    ENCODING_COPY_RECT = 1,
+    ENCODING_RRE = 2,
+    ENCODING_CORRE = 4,
+    ENCODING_HEXTILE = 5,
+    ENCODING_ZLIB = 6,
+    ENCODING_TRLE = 15,
+    ENCODING_ZRLE = 16,
+  };
 };
 
 #endif
