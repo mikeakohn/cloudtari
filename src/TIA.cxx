@@ -343,7 +343,7 @@ bool TIA::draw_player_0()
 {
   if (player_0.is_pixel_on(pos_x))
   {
-    television->draw_pixel(get_x(), get_y(), colors.playfield);
+    television->draw_pixel(get_x(), get_y(), colors.player_0);
 
     return true;
   }
@@ -355,7 +355,7 @@ bool TIA::draw_player_1()
 {
   if (player_1.is_pixel_on(pos_x))
   {
-    television->draw_pixel(get_x(), get_y(), colors.playfield);
+    television->draw_pixel(get_x(), get_y(), colors.player_1);
 
     return true;
   }
