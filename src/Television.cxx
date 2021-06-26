@@ -11,7 +11,7 @@
 
 #include "Television.h"
 
-Television::Television()
+Television::Television() : width{480}, height{384}
 {
 }
 

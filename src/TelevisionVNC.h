@@ -30,10 +30,13 @@ public:
   virtual void set_port(int value) { port = value; };
 
 private:
-  int vnc_send(uint8_t *buffer, int len);
+  int vnc_send(const uint8_t *buffer, int len);
   int vnc_recv(uint8_t *buffer, int len);
   int send_protocol_version();
   int get_client_protocol_version();
+  int send_security();
+  int get_client_init();
+  int send_server_init();
 
   int socket_id;
   int client;

@@ -27,6 +27,9 @@ public:
   virtual int handle_events() = 0;
   virtual void set_port(int value) { };
 
+protected:
+  int width, height;
+
 private:
 
 };

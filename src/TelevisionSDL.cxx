@@ -15,19 +15,19 @@ TelevisionSDL::TelevisionSDL()
 {
   SDL_Init(SDL_INIT_EVERYTHING);
 
-  //window = DL_SetVideoMode(640, 480, 32, SDL_SWSURFACE);
+  //window = DL_SetVideoMode(640, width, 32, SDL_SWSURFACE);
   window = SDL_CreateWindow(
     "Debug",
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOWPOS_UNDEFINED,
-    480,
-    384,
+    width,
+    height,
     0);
 
   background_rect.x = 0;
   background_rect.y = 0;
-  background_rect.w = 480;
-  background_rect.h = 384;
+  background_rect.w = width;
+  background_rect.h = height;
 
   //renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 

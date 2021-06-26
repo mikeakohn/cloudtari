@@ -117,7 +117,16 @@ int main(int argc, char *argv[])
     television = new TelevisionNull();
   }
 
-  television->init();
+  if (television->init() != 0)
+  {
+    delete m6502;
+    delete rom;
+    delete memory_bus;
+    delete television;
+
+    printf("Display init error.\n");
+    return -1;
+  }
 
   PIA *pia = memory_bus->get_pia();
   TIA *tia = memory_bus->get_tia();
