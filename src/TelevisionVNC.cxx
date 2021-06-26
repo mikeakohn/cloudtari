@@ -37,6 +37,8 @@ TelevisionVNC::TelevisionVNC() :
   image_packet->width = htons(width);
   image_packet->height = htons(height);
   image_packet->encoding_type = htonl(ENCODING_RAW);
+
+  memset(&refresh_time, 0, sizeof(refresh_time));
 }
 
 TelevisionVNC::~TelevisionVNC()
@@ -107,6 +109,8 @@ void TelevisionVNC::draw_pixel(int x, int y, uint8_t color)
   x = x * 2;
   y = y * 2;
 
+  if (x < 0 || y < 0) { return; }
+
   pixel = (y * width) + x;
 
   if (pixel < width * height + width + 1)
@@ -120,8 +124,21 @@ void TelevisionVNC::draw_pixel(int x, int y, uint8_t color)
 
 bool TelevisionVNC::refresh()
 {
+  struct timeval now;
+
+  gettimeofday(&now, NULL);
+  long time_diff = now.tv_usec - refresh_time.tv_usec;
+  while(time_diff < 0) { now.tv_sec--; time_diff += 1000000; }
+  time_diff += (now.tv_sec - refresh_time.tv_sec) * 1000000;
+
+  if (time_diff < 16000)
+  {
+    usleep(16000 - time_diff);
+  }
+
+  refresh_time = now;
+
   send_image_full();
-printf("refresh\n");
 
   return true;
 }
@@ -287,7 +304,7 @@ bool TelevisionVNC::vnc_has_data()
   FD_ZERO(&readset);
   FD_SET(client, &readset);
 
-  tv.tv_sec = 10;
+  tv.tv_sec = 0;
   tv.tv_usec = 0;
 
   int n = select(client + 1, &readset, NULL, NULL, &tv);
@@ -467,6 +484,8 @@ int TelevisionVNC::send_color_table()
 
 int TelevisionVNC::send_image_full()
 {
+  if (needs_color_table) { return 0; }
+
   if (vnc_send((const uint8_t *)image_packet, image_packet_length) != image_packet_length)
   {
     printf("Error: Send packet %s:%d\n", __FILE__, __LINE__);

@@ -13,6 +13,7 @@
 #define TELEVISION_VNC_H
 
 #include <stdint.h>
+#include <sys/time.h>
 
 #include "Television.h"
 
@@ -50,6 +51,7 @@ private:
 
   bool needs_color_table;
   int image_packet_length;
+  struct timeval refresh_time;
 
   struct ImagePacket
   {
