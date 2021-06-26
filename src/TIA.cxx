@@ -93,7 +93,7 @@ void TIA::write_memory(int address, uint8_t value)
       colors.playfield = ColorTable::get_color(value);
       break;
     case REFP0:
-printf("REFP0 %d\n", value);
+//printf("REFP0 %d\n", value);
       write_regs[REFP0] = value;
       build_player_0();
       break;
@@ -134,34 +134,34 @@ printf("REFP0 %d\n", value);
     case AUDV1:
       break;
     case GRP0:
-printf("GRP0 %02x (%d, %d)\n", value, pos_x, pos_y);
+//printf("GRP0 %02x (%d, %d)\n", value, pos_x, pos_y);
       write_regs[GRP0] = value;
       build_player_0();
       break;
     case GRP1:
-printf("GRP1 %02x (%d, %d)\n", value, pos_x, pos_y);
+//printf("GRP1 %02x (%d, %d)\n", value, pos_x, pos_y);
       write_regs[GRP1] = value;
       build_player_1();
       break;
     case HMP0:
       player_0.set_offset(compute_offset(value));
-printf("HMP0  0x%02x offset=%d (%d,%d)\n", value, player_0.next_offset, pos_x, pos_y);
+//printf("HMP0  0x%02x offset=%d (%d,%d)\n", value, player_0.next_offset, pos_x, pos_y);
       break;
     case HMP1:
       player_1.set_offset(compute_offset(value));
-printf("HMP1  0x%02x offset=%d (%d,%d)\n", value, player_1.next_offset, pos_x, pos_y);
+//printf("HMP1  0x%02x offset=%d (%d,%d)\n", value, player_1.next_offset, pos_x, pos_y);
       break;
     case HMM0:
       break;
     case HMM1:
       break;
     case HMOVE:
-printf("HMOVE %d\n", value);
+//printf("HMOVE %d\n", value);
       player_0.apply_offset();
       player_1.apply_offset();
       break;
     case HMCLR:
-printf("HMCLR %d\n", value);
+//printf("HMCLR %d\n", value);
       // Clear motion registers.
       player_0.clear_offset();
       player_1.clear_offset();
@@ -280,13 +280,13 @@ void TIA::clock(int ticks)
   if (player_0.need_set_position())
   {
     player_0.set_position(pos_x);
-printf("player_0.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
+//printf("player_0.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
   }
 
   if (player_1.need_set_position())
   {
     player_1.set_position(pos_x);
-printf("player_1.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
+//printf("player_1.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
   }
 }
 

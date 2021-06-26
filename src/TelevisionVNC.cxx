@@ -26,10 +26,14 @@ TelevisionVNC::TelevisionVNC() :
   client(-1),
   port(5900)
 {
+  image_packet = (ImagePacket *)malloc(
+    sizeof(ImagePacket) + width * height * sizeof(uint32_t));
 }
 
 TelevisionVNC::~TelevisionVNC()
 {
+  close_connection();
+  free(image_packet);
 }
 
 int TelevisionVNC::init()
@@ -81,19 +85,111 @@ int TelevisionVNC::init()
 
 void TelevisionVNC::clear_display()
 {
+  const int length = width * height * 3;
+
+  memset(image_packet->data, 0, length);
 }
 
 void TelevisionVNC::draw_pixel(int x, int y, uint32_t color)
 {
+  int pixel;
+
+  x = x * 2;
+  y = y * 2;
+
+  pixel = (y * width) + x;
+
+  image_packet->data[pixel + 0] = color;
+  image_packet->data[pixel + 1] = color;
+  image_packet->data[pixel + width + 0] = color;
+  image_packet->data[pixel + width + 1] = color;
 }
 
 bool TelevisionVNC::refresh()
 {
+  send_image_full();
+
   return true;
 }
 
 int TelevisionVNC::handle_events()
 {
+  uint8_t buffer[128];
+  uint32_t key;
+  int n, count;
+
+  if (vnc_has_data())
+  {
+    uint8_t message_type = 0xff;
+
+    vnc_recv(&message_type, 1);
+printf("data is waiting %02x\n", message_type);
+
+    switch (message_type)
+    {
+      case 0:
+        printf("SetPixelFormat\n");
+        vnc_recv(buffer, 19);
+        break;
+      case 2:
+        printf("SetEncodings\n");
+        vnc_recv(buffer, 3);
+        count = (buffer[1] << 8) | buffer[2];
+
+        for (n = 0; n < count; n++) { vnc_recv(buffer, 4); }
+        break;
+      case 3:
+        printf("FramebufferUpdateRequest\n");
+        vnc_recv(buffer + 1, 9);
+        send_image_update(
+          (buffer[2] << 8) | buffer[3],
+          (buffer[4] << 8) | buffer[5],
+          (buffer[6] << 8) | buffer[7],
+          (buffer[8] << 8) | buffer[9]);
+        break;
+      case 4:
+        printf("KeyEvent\n");
+        vnc_recv(buffer + 1, 7);
+        key =
+          (buffer[4] << 24) |
+          (buffer[5] << 16) |
+          (buffer[6] << 8) |
+           buffer[7];
+
+        // If buffer[1] is not 0 then it's a keydown.
+        if (buffer[1] != 0)
+        {
+          // Escape key quits the game.
+          if (key == 0xff1b) { return -1; }
+
+          // Tab key was pressed.
+          if (key == 0xff09) { return 1; }
+        }
+          else
+        {
+          // Tab key was released.
+          if (key == 0xff09) { return 2; }
+        }
+
+        break;
+      case 5:
+        printf("PointerEvent\n");
+        vnc_recv(buffer + 1, 5);
+        break;
+      case 6:
+        printf("ClientCutText\n");
+        vnc_recv(buffer + 1, 7);
+        count =
+          (buffer[4] << 24) |
+          (buffer[5] << 16) |
+          (buffer[6] << 8) |
+           buffer[7];
+        // FIXME: This is not efficient, but don't really expect this one.
+        for (n = 0; n < count; n++) { vnc_recv(buffer, 1); }
+        break;
+    }
+  }
+
   return 0;
 }
 
@@ -114,13 +210,14 @@ int TelevisionVNC::vnc_send(const uint8_t *buffer, int length)
 
     int n = select(client + 1, NULL, &writeset, NULL, &tv);
 
-    if (n == -1 && errno != EINTR)
+    if (n == -1)
     {
+      if (errno == EINTR) { continue; }
+
       perror("Problem with select in vnc_send");
       return -1;
     }
 
-    if (n == -1) { return -2; }
     if (n == 0) { return -3; }
 
     n = send(client, buffer + bytes_sent, length - bytes_sent, 0);
@@ -149,13 +246,14 @@ int TelevisionVNC::vnc_recv(uint8_t *buffer, int length)
 
     int n = select(client + 1, &readset, NULL, NULL, &tv);
 
-    if (n == -1 && errno != EINTR)
+    if (n == -1)
     {
+      if (errno == EINTR) { continue; }
+
       perror("Problem with select in vnc_recv");
       return -1;
     }
 
-    if (n == -1) { return -2; }
     if (n == 0) { return -3; }
 
     n = recv(client, buffer + bytes_received, length - bytes_received, 0);
@@ -165,6 +263,38 @@ int TelevisionVNC::vnc_recv(uint8_t *buffer, int length)
   }
 
   return bytes_received;
+}
+
+bool TelevisionVNC::vnc_has_data()
+{
+  struct timeval tv;
+  fd_set readset;
+
+  FD_ZERO(&readset);
+  FD_SET(client, &readset);
+
+  tv.tv_sec = 10;
+  tv.tv_usec = 0;
+
+  int n = select(client + 1, &readset, NULL, NULL, &tv);
+
+  if (n == -1)
+  {
+    if (errno == EINTR) { return false; }
+
+    perror("Problem with select in vnc_recv");
+    close_connection();
+    return false;
+  }
+
+  return FD_ISSET(client, &readset);
+}
+
+void TelevisionVNC::close_connection()
+{
+  if (socket_id == -1) { return; }
+  close(socket_id);
+  socket_id = -1;
 }
 
 int TelevisionVNC::send_protocol_version()
@@ -271,6 +401,18 @@ int TelevisionVNC::send_server_init()
     printf("Error: Send packet %s:%d\n", __FILE__, __LINE__);
     return -1;
   }
+
+  return 0;
+}
+
+int TelevisionVNC::send_image_full()
+{
+  return 0;
+}
+
+int TelevisionVNC::send_image_update(int x, int y, int width, int height)
+{
+  printf("send_image_update(%d, %d, %d, %d)\n", x, y, width, height);
 
   return 0;
 }

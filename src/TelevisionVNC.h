@@ -32,15 +32,25 @@ public:
 private:
   int vnc_send(const uint8_t *buffer, int len);
   int vnc_recv(uint8_t *buffer, int len);
+  bool vnc_has_data();
+  void close_connection();
   int send_protocol_version();
   int get_client_protocol_version();
   int send_security();
   int get_client_init();
   int send_server_init();
+  int send_image_full();
+  int send_image_update(int x, int y, int width, int height);
 
   int socket_id;
   int client;
   int port;
+
+  struct ImagePacket
+  {
+    uint8_t header[16];
+    uint32_t data[];
+  } *image_packet;
 };
 
 #endif
