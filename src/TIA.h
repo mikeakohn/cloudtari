@@ -76,10 +76,10 @@ private:
 
     bool is_pixel_on(int pos_x)
     {
-      int x = pos_x + offset;
-      if (x < 68) { return false; }
-      x = (x - start_pos) / scale;
-      if (x >= 7) { return false; }
+      if (pos_x < 68) { return false; }
+      if (pos_x < start_pos - offset) { return false; }
+      int x = (pos_x - (start_pos - offset)) / scale;
+      if (x > 7) { return false; }
       return (data & (1 << x)) != 0;
     }
 
