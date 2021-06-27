@@ -9,7 +9,6 @@
  *
  */
 
-#include "ColorTable.h"
 #include "TelevisionSDL.h"
 
 TelevisionSDL::TelevisionSDL()
@@ -60,7 +59,7 @@ void TelevisionSDL::clear_display()
   SDL_UpdateWindowSurface(window);
 }
 
-void TelevisionSDL::draw_pixel(int x, int y, uint8_t color)
+void TelevisionSDL::draw_pixel(int x, int y, uint32_t color)
 {
   SDL_Rect rect;
 
@@ -69,7 +68,7 @@ void TelevisionSDL::draw_pixel(int x, int y, uint8_t color)
   rect.w = 3;
   rect.h = 2;
 
-  SDL_FillRect(screen, &rect, ColorTable::get_color(color));
+  SDL_FillRect(screen, &rect, color);
 }
 
 bool TelevisionSDL::refresh()

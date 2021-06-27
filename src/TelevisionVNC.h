@@ -25,7 +25,7 @@ public:
 
   virtual int init();
   virtual void clear_display();
-  virtual void draw_pixel(int x, int y, uint8_t color);
+  virtual void draw_pixel(int x, int y, uint32_t color);
   virtual bool refresh();
   virtual int handle_events();
   virtual void set_port(int value) { port = value; };
@@ -63,7 +63,7 @@ private:
     uint16_t width;
     uint16_t height;
     int encoding_type;
-    uint8_t data[];
+    uint32_t data[];
   } *image_packet;
 
   enum

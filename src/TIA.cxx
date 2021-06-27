@@ -81,16 +81,16 @@ void TIA::write_memory(int address, uint8_t value)
       player_size(player_1, value);
       break;
     case COLUP0:
-      colors.player_0 = value;
+      colors.player_0 = ColorTable::get_color(value);
       break;
     case COLUP1:
-      colors.player_1 = value;
+      colors.player_1 = ColorTable::get_color(value);
       break;
     case COLUBK:
-      colors.background = value;
+      colors.background = ColorTable::get_color(value);
       break;
     case COLUPF:
-      colors.playfield = value;
+      colors.playfield = ColorTable::get_color(value);
       break;
     case REFP0:
 //printf("REFP0 %d\n", value);

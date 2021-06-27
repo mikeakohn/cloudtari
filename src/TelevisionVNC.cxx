@@ -26,9 +26,9 @@ TelevisionVNC::TelevisionVNC() :
   socket_id{-1},
   client{-1},
   port{5900},
-  needs_color_table{false}
+  needs_color_table{true}
 {
-  image_packet_length = sizeof(ImagePacket) + (width * height);
+  image_packet_length = sizeof(ImagePacket) + (width * height * 4);
   image_packet = (ImagePacket *)malloc(image_packet_length);
 
   memset(image_packet, 0, image_packet_length);
@@ -97,16 +97,16 @@ int TelevisionVNC::init()
 
 void TelevisionVNC::clear_display()
 {
-  const int length = width * height;
+  const int length = width * height * 4;
 
   memset(image_packet->data, 0, length);
 }
 
-void TelevisionVNC::draw_pixel(int x, int y, uint8_t color)
+void TelevisionVNC::draw_pixel(int x, int y, uint32_t color)
 {
   int pixel;
 
-  x = x * 2;
+  x = x * 3;
   y = y * 2;
 
   if (x < 0 || y < 0) { return; }
@@ -117,8 +117,10 @@ void TelevisionVNC::draw_pixel(int x, int y, uint8_t color)
   { 
     image_packet->data[pixel + 0] = color;
     image_packet->data[pixel + 1] = color;
+    image_packet->data[pixel + 2] = color;
     image_packet->data[pixel + width + 0] = color;
     image_packet->data[pixel + width + 1] = color;
+    image_packet->data[pixel + width + 2] = color;
   }
 }
 
@@ -409,17 +411,17 @@ int TelevisionVNC::send_server_init()
   packet.width = htons(width);
   packet.height = htons(height);
   packet.bits_per_pixel = 32;
-  packet.depth = 24;
+  packet.depth = 32;
   //packet.bits_per_pixel = 8;
   //packet.depth = 8;
   //packet.big_endian_flag = 1;
-  //packet.true_colour_flag = 1;
-  //packet.red_max = htons(255);
-  //packet.green_max = htons(255);
-  //packet.blue_max = htons(255);
-  //packet.red_shift = 16;
-  //packet.green_shift = 8;
-  //packet.blue_shift = 0;
+  packet.true_colour_flag = 1;
+  packet.red_max = htons(255);
+  packet.green_max = htons(255);
+  packet.blue_max = htons(255);
+  packet.red_shift = 16;
+  packet.green_shift = 8;
+  packet.blue_shift = 0;
   packet.name_length = htonl(8);
   memcpy(packet.name, "ATARI---", 8);
 
@@ -499,11 +501,11 @@ int TelevisionVNC::send_image_update(int x, int y, int width, int height)
 {
   if (needs_color_table)
   {
-    if (send_color_table() != 0) { return -1; }
+    //if (send_color_table() != 0) { return -1; }
     needs_color_table = false;
   }
 
-  printf("send_image_update(%d, %d, %d, %d)\n", x, y, width, height);
+  //printf("send_image_update(%d, %d, %d, %d)\n", x, y, width, height);
 
   if (x == 0 && y == 0 && width == this->width && height == this->height)
   {
