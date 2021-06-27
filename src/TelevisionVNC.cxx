@@ -193,15 +193,27 @@ int TelevisionVNC::handle_events()
         if (buffer[1] != 0)
         {
           // Escape key quits the game.
-          if (key == 0xff1b) { return -1; }
+          if (key == 0xff1b) { return KEY_QUIT; }
 
           // Tab key was pressed.
-          if (key == 0xff09) { return 1; }
+          if (key == 0xff09) { return KEY_SELECT_DOWN; }
+          if (key == 0xff0d) { return KEY_RESET_DOWN; }
+          if (key == 0xff51) { return KEY_LEFT_DOWN; }
+          if (key == 0xff54) { return KEY_UP_DOWN; }
+          if (key == 0xff53) { return KEY_RIGHT_DOWN; }
+          if (key == 0xff54) { return KEY_DOWN_DOWN; }
+          if (key == ' ') { return KEY_FIRE_DOWN; }
         }
           else
         {
           // Tab key was released.
-          if (key == 0xff09) { return 2; }
+          if (key == 0xff09) { return KEY_SELECT_UP; }
+          if (key == 0xff0d) { return KEY_RESET_UP; }
+          if (key == 0xff51) { return KEY_LEFT_UP; }
+          if (key == 0xff54) { return KEY_UP_UP; }
+          if (key == 0xff53) { return KEY_RIGHT_UP; }
+          if (key == 0xff54) { return KEY_DOWN_UP; }
+          if (key == ' ') { return KEY_FIRE_UP; }
         }
 
         break;

@@ -33,6 +33,10 @@ public:
   void clock(int ticks);
   void dump();
   bool wait_for_hsync() { return write_regs[WSYNC] != 0; }
+  void set_joystick_0_fire() { read_regs[INPT4] &= 0x7f; }
+  void set_joystick_1_fire() { read_regs[INPT5] &= 0x7f; }
+  void clear_joystick_0_fire() { read_regs[INPT4] |= 0x80; }
+  void clear_joystick_1_fire() { read_regs[INPT5] |= 0x80; }
 
   int compute_offset(int value)
   {

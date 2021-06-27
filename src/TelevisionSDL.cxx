@@ -87,17 +87,29 @@ int TelevisionSDL::handle_events()
     switch(event.type)
     {
       case SDL_KEYDOWN:
-        if (event.key.keysym.sym == SDLK_ESCAPE) { return -1; }
-        if (event.key.keysym.sym == SDLK_TAB) { return 1; }
+        if (event.key.keysym.sym == SDLK_ESCAPE) { return KEY_QUIT; }
+        if (event.key.keysym.sym == SDLK_TAB) { return KEY_SELECT_DOWN; }
+        if (event.key.keysym.sym == SDLK_RETURN) { return KEY_RESET_DOWN; }
+        if (event.key.keysym.sym == SDLK_LEFT) { return KEY_LEFT_DOWN; }
+        if (event.key.keysym.sym == SDLK_RIGHT) { return KEY_RIGHT_DOWN; }
+        if (event.key.keysym.sym == SDLK_UP) { return KEY_UP_DOWN; }
+        if (event.key.keysym.sym == SDLK_DOWN) { return KEY_DOWN_DOWN; }
+        if (event.key.keysym.sym == SDLK_SPACE) { return KEY_FIRE_DOWN; }
         break;
 
       case SDL_KEYUP:
-        if (event.key.keysym.sym == SDLK_TAB) { return 2; }
+        if (event.key.keysym.sym == SDLK_TAB) { return KEY_SELECT_UP; }
+        if (event.key.keysym.sym == SDLK_RETURN) { return KEY_RESET_UP; }
+        if (event.key.keysym.sym == SDLK_LEFT) { return KEY_LEFT_UP; }
+        if (event.key.keysym.sym == SDLK_RIGHT) { return KEY_RIGHT_UP; }
+        if (event.key.keysym.sym == SDLK_UP) { return KEY_UP_UP; }
+        if (event.key.keysym.sym == SDLK_DOWN) { return KEY_DOWN_UP; }
+        if (event.key.keysym.sym == SDLK_SPACE) { return KEY_FIRE_UP; }
         break;
 
         break;
       case SDL_QUIT:
-        return -1;
+        return KEY_QUIT;
     }
   }
 

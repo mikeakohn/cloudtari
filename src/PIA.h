@@ -24,8 +24,28 @@ public:
   uint8_t read_memory(int address);
   void write_memory(int address, uint8_t value);
   void clock(int ticks);
-  void set_switch_reset() { riot[SWCHB & 0x7] &= 0xfe; }
-  void clear_switch_reset() { riot[SWCHB & 0x7] |= 0x01; }
+  void set_switch_reset()    { riot[SWCHB & 0x7] &= 0xfe; }
+  void set_switch_select()   { riot[SWCHB & 0x7] &= 0xfd; }
+  void clear_switch_reset()  { riot[SWCHB & 0x7] |= 0x01; }
+  void clear_switch_select() { riot[SWCHB & 0x7] |= 0x02; }
+
+  void clear_joystick_0_right() { riot[SWCHA & 0x7] |= 0x80; }
+  void clear_joystick_0_left()  { riot[SWCHA & 0x7] |= 0x40; }
+  void clear_joystick_0_down()  { riot[SWCHA & 0x7] |= 0x20; }
+  void clear_joystick_0_up()    { riot[SWCHA & 0x7] |= 0x10; }
+  void clear_joystick_1_right() { riot[SWCHA & 0x7] |= 0x08; }
+  void clear_joystick_1_left()  { riot[SWCHA & 0x7] |= 0x04; }
+  void clear_joystick_1_down()  { riot[SWCHA & 0x7] |= 0x02; }
+  void clear_joystick_1_up()    { riot[SWCHA & 0x7] |= 0x01; }
+
+  void set_joystick_0_right() { riot[SWCHA & 0x7] &= 0x7f; }
+  void set_joystick_0_left()  { riot[SWCHA & 0x7] &= 0xbf; }
+  void set_joystick_0_down()  { riot[SWCHA & 0x7] &= 0xdf; }
+  void set_joystick_0_up()    { riot[SWCHA & 0x7] &= 0xef; }
+  void set_joystick_1_right() { riot[SWCHA & 0x7] &= 0xf7; }
+  void set_joystick_1_left()  { riot[SWCHA & 0x7] &= 0xfb; }
+  void set_joystick_1_down()  { riot[SWCHA & 0x7] &= 0xfd; }
+  void set_joystick_1_up()    { riot[SWCHA & 0x7] &= 0xfe; }
 
 private:
   const int TIM1T = 1;
