@@ -63,7 +63,16 @@ private:
 
   struct Player
   {
-    Player() : data{0}, set_pos{false}, scale{1}, start_pos{0}, offset{0} { }
+    Player() :
+      data{0},
+      set_pos{false},
+      vertical_delay{false},
+      need_update{false},
+      scale{1},
+      start_pos{0},
+      offset{0}
+    {
+    }
 
     void reset() { start_pos = 0; }
     void set_position() { set_pos = true; }
@@ -85,6 +94,8 @@ private:
 
     uint8_t data;
     bool set_pos;
+    bool vertical_delay;
+    bool need_update;
     int scale, start_pos, offset, next_offset;
   };
 

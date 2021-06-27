@@ -134,14 +134,28 @@ void TIA::write_memory(int address, uint8_t value)
     case AUDV1:
       break;
     case GRP0:
-//printf("GRP0 %02x (%d, %d)\n", value, pos_x, pos_y);
+      //printf("GRP0 %02x (%d, %d)\n", value, pos_x, pos_y);
       write_regs[GRP0] = value;
-      build_player_0();
+      if (!player_0.vertical_delay)
+      {
+        build_player_0();
+      }
+        else
+      {
+        player_0.need_update = true;
+      }
       break;
     case GRP1:
-//printf("GRP1 %02x (%d, %d)\n", value, pos_x, pos_y);
+      //printf("GRP1 %02x (%d, %d)\n", value, pos_x, pos_y);
       write_regs[GRP1] = value;
-      build_player_1();
+      if (!player_1.vertical_delay)
+      {
+        build_player_1();
+      }
+        else
+      {
+        player_1.need_update = true;
+      }
       break;
     case HMP0:
       player_0.set_offset(compute_offset(value));
@@ -154,6 +168,16 @@ void TIA::write_memory(int address, uint8_t value)
     case HMM0:
       break;
     case HMM1:
+      break;
+    case HMBL:
+      break;
+    case VDELP0:
+      player_0.vertical_delay = value & 1;
+      break;
+    case VDELP1:
+      player_1.vertical_delay = value & 1;
+      break;
+    case VDELBL:
       break;
     case HMOVE:
 //printf("HMOVE %d\n", value);
@@ -218,6 +242,8 @@ void TIA::build_player_0()
   {
     player_0.data = write_regs[GRP0];
   }
+
+  player_0.need_update = false;
 }
 
 void TIA::build_player_1()
@@ -230,6 +256,8 @@ void TIA::build_player_1()
   {
     player_1.data = write_regs[GRP1];
   }
+
+  player_1.need_update = false;
 }
 
 void TIA::clock()
@@ -241,25 +269,15 @@ void TIA::clock()
     if (pos_x == 68) { playfield.reset(); }
 
     draw_pixel();
-
-#if 0
-    if ((player0 & 0xf00) != 0)
-    {
-      player0_clocks++;
-
-      if ((player0_clocks % (1 << (write_regs[NUSIZ0] & 0x03))) == 0)
-      {
-        player0 = player0 >> 1;
-      }
-    }
-#endif
-
   }
 
   pos_x++;
 
   if (pos_x == 68 + 160)
   {
+    if (player_0.need_update) { build_player_0(); }
+    if (player_1.need_update) { build_player_1(); }
+
     write_regs[WSYNC] = 0;
     pos_x = 0;
     pos_y++;
