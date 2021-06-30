@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 
   if (rom->load(argv[1]) != 0) { exit(-1); }
 
+  memory_bus->init();
   memory_bus->set_rom(rom);
   m6502->set_memory_bus(memory_bus);
   m6502->reset();

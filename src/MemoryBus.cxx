@@ -30,7 +30,7 @@ MemoryBus::~MemoryBus()
 
 void MemoryBus::init()
 {
-  tia->init();
+  tia->reset();
 }
 
 uint8_t MemoryBus::read(int address)

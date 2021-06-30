@@ -32,13 +32,15 @@ TIA::TIA() : pos_x{0}, pos_y{0}
        ((n & 0x10) >> 1) | ((n & 0x20) >> 3) |
        ((n & 0x40) >> 5) | ((n & 0x80) >> 7));
   }
+
+  reset();
 }
 
 TIA::~TIA()
 {
 }
 
-void TIA::init()
+void TIA::reset()
 {
   pos_x = 0;
   pos_y = 0;
@@ -47,6 +49,9 @@ void TIA::init()
 
   memset(write_regs, 0, sizeof(write_regs));
   memset(read_regs, 0, sizeof(read_regs));
+
+  read_regs[INPT4] = 0x80;
+  read_regs[INPT5] = 0x80;
 }
 
 uint8_t TIA::read_memory(int address)
@@ -335,7 +340,7 @@ void TIA::clock(int ticks)
   if (player_1.need_set_position())
   {
     player_1.set_position(pos_x);
-//printf("player_1.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
+//printf("player_1.start_pos=%d (y=%d)\n", player_1.start_pos, pos_y);
   }
 
   if (missile_0.need_set_position()) { missile_0.set_position(pos_x); }

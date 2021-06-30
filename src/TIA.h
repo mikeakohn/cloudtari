@@ -22,7 +22,7 @@ public:
   TIA();
   ~TIA();
 
-  void init();
+  void reset();
   void set_television(Television *television) { this->television = television; }
   uint8_t read_memory(int address);
   void write_memory(int address, uint8_t value);
