@@ -117,12 +117,15 @@ void TIA::write_memory(int address, uint8_t value)
       break;
     case RESM0:
       // Reset missile 0.
+      missile_0.set_position();
       break;
     case RESM1:
       // Reset missile 1.
+      missile_1.set_position();
       break;
     case RESBL:
       // Reset ball.
+      ball.set_position();
       break;
     case AUDC0:
     case AUDC1:
@@ -157,6 +160,29 @@ void TIA::write_memory(int address, uint8_t value)
         player_1.need_update = true;
       }
       break;
+    case ENAM0:
+      missile_0.set_enabled((value & 2) != 0);
+      break;
+    case ENAM1:
+      missile_1.set_enabled((value & 2) != 0);
+      break;
+    case ENABL:
+      if ((value & 2) == 0)
+      {
+        ball.set_enabled(false);
+      }
+        else
+      {
+        if (!ball.vertical_delay)
+        {
+          ball.set_enabled(true);
+        }
+          else
+        {
+          ball.need_update = true;
+        }
+      }
+      break;
     case HMP0:
       player_0.set_offset(compute_offset(value));
 //printf("HMP0  0x%02x offset=%d (%d,%d)\n", value, player_0.next_offset, pos_x, pos_y);
@@ -166,10 +192,13 @@ void TIA::write_memory(int address, uint8_t value)
 //printf("HMP1  0x%02x offset=%d (%d,%d)\n", value, player_1.next_offset, pos_x, pos_y);
       break;
     case HMM0:
+      missile_0.set_offset(compute_offset(value));
       break;
     case HMM1:
+      missile_1.set_offset(compute_offset(value));
       break;
     case HMBL:
+      ball.set_offset(compute_offset(value));
       break;
     case VDELP0:
       player_0.vertical_delay = value & 1;
@@ -178,20 +207,22 @@ void TIA::write_memory(int address, uint8_t value)
       player_1.vertical_delay = value & 1;
       break;
     case VDELBL:
+      ball.vertical_delay = value & 1;
       break;
     case HMOVE:
-//printf("HMOVE %d\n", value);
       player_0.apply_offset();
       player_1.apply_offset();
+      missile_0.apply_offset();
+      missile_1.apply_offset();
+      ball.apply_offset();
       break;
     case HMCLR:
-//printf("HMCLR %d\n", value);
       // Clear motion registers.
       player_0.clear_offset();
       player_1.clear_offset();
-      write_regs[HMM0] = 0;
-      write_regs[HMM1] = 0;
-      write_regs[HMBL] = 0;
+      missile_0.clear_offset();
+      missile_1.clear_offset();
+      ball.clear_offset();
       break;
     case CXCLR:
       // Clear collision latches.
@@ -306,6 +337,10 @@ void TIA::clock(int ticks)
     player_1.set_position(pos_x);
 //printf("player_1.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
   }
+
+  if (missile_0.need_set_position()) { missile_0.set_position(pos_x); }
+  if (missile_1.need_set_position()) { missile_1.set_position(pos_x); }
+  if (ball.need_set_position()) { ball.set_position(pos_x); }
 }
 
 void TIA::player_size(Player &player, int value)
@@ -383,16 +418,37 @@ bool TIA::draw_player_1()
 
 bool TIA::draw_missile_0()
 {
+  if (missile_0.is_pixel_on(pos_x))
+  {
+    television->draw_pixel(get_x(), get_y(), colors.player_0);
+
+    return true;
+  }
+
   return false;
 }
 
 bool TIA::draw_missile_1()
 {
+  if (missile_1.is_pixel_on(pos_x))
+  {
+    television->draw_pixel(get_x(), get_y(), colors.player_1);
+
+    return true;
+  }
+
   return false;
 }
 
 bool TIA::draw_ball()
 {
+  if (ball.is_pixel_on(pos_x))
+  {
+    television->draw_pixel(get_x(), get_y(), colors.playfield);
+
+    return true;
+  }
+
   return false;
 }
 

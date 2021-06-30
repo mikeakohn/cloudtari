@@ -103,6 +103,52 @@ private:
     int scale, start_pos, offset, next_offset;
   };
 
+  struct Sprite
+  {
+    Sprite() :
+      width{1},
+      set_pos{false},
+      enabled{false},
+      start_pos{0},
+      offset{0}
+    {
+    }
+
+    void reset() { start_pos = 0; }
+    void set_position() { set_pos = true; }
+    void set_position(int pos_x) { start_pos = pos_x; set_pos = false; }
+    void set_width(int value) { width = value; }
+    void set_offset(int value) { next_offset = value; }
+    void apply_offset() { offset = next_offset; }
+    void clear_offset() { offset = 0; next_offset = 0; }
+    void set_enabled(bool value) { enabled = value; }
+    bool need_set_position() { return set_pos; }
+
+    bool is_pixel_on(int pos_x)
+    {
+      if (!enabled) { return false; }
+      if (pos_x < 68) { return false; }
+      int x = start_pos - offset;
+      return pos_x >= x && pos_x < x + width;
+    }
+
+    uint8_t width;
+    bool set_pos;
+    bool enabled;
+    int start_pos, offset, next_offset;
+  };
+
+  struct Missile : public Sprite
+  {
+  };
+
+  struct Ball : public Sprite
+  {
+    Ball() : need_update{false}, vertical_delay{false} { };
+    bool need_update;
+    bool vertical_delay;
+  };
+
   int get_x() { return pos_x - 68; }
   int get_y() { return pos_y - 37; }
   void player_size(Player &player, int value);
@@ -131,6 +177,9 @@ private:
   Playfield playfield;
   Player player_0;
   Player player_1;
+  Missile missile_0;
+  Missile missile_1;
+  Ball ball;
 
   uint8_t write_regs[64];
   uint8_t read_regs[16];
