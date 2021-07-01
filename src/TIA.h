@@ -26,9 +26,6 @@ public:
   void set_television(Television *television) { this->television = television; }
   uint8_t read_memory(int address);
   void write_memory(int address, uint8_t value);
-  void build_playfield();
-  void build_player_0();
-  void build_player_1();
   void clock();
   void clock(int ticks);
   void dump();
@@ -152,6 +149,9 @@ private:
   int get_x() { return pos_x - 68; }
   int get_y() { return pos_y - 37; }
   void player_size(Player &player, int value);
+  void build_playfield();
+  void build_player_0();
+  void build_player_1();
   bool draw_playfield_fg();
   bool draw_player_0();
   bool draw_player_1();
@@ -160,6 +160,7 @@ private:
   bool draw_ball();
   void draw_playfield_bg();
   void draw_pixel();
+  void compute_collisions();
 
   struct Colors
   {

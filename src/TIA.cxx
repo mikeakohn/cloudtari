@@ -81,9 +81,11 @@ void TIA::write_memory(int address, uint8_t value)
       break;
     case NUSIZ0:
       player_size(player_0, value);
+      missile_0.set_width(1 << ((value >> 4) & 0x3));
       break;
     case NUSIZ1:
       player_size(player_1, value);
+      missile_1.set_width(1 << ((value >> 4) & 0x3));
       break;
     case COLUP0:
       colors.player_0 = ColorTable::get_color(value);
@@ -96,6 +98,10 @@ void TIA::write_memory(int address, uint8_t value)
       break;
     case COLUPF:
       colors.playfield = ColorTable::get_color(value);
+      break;
+    case CTRLPF:
+      write_regs[CTRLPF] = value;
+      ball.set_width(1 << ((value >> 4) & 0x3));
       break;
     case REFP0:
 //printf("REFP0 %d\n", value);
@@ -246,6 +252,123 @@ void TIA::write_memory(int address, uint8_t value)
   }
 }
 
+void TIA::clock()
+{
+  // The main playfield area starts after 68 clocks.
+  if (pos_x >= 68 && pos_y >= 40 && pos_y < 232)
+  {
+    // The point to the first bit to be displayed from PF0, PF1, PF2.
+    if (pos_x == 68) { playfield.reset(); }
+
+    draw_pixel();
+    compute_collisions();
+  }
+
+  pos_x++;
+
+  if (pos_x == 68 + 160)
+  {
+    if (player_0.need_update) { build_player_0(); }
+    if (player_1.need_update) { build_player_1(); }
+
+    write_regs[WSYNC] = 0;
+    pos_x = 0;
+    pos_y++;
+  }
+}
+
+void TIA::clock(int ticks)
+{
+  // Every CPU cycle is 3 pixels.
+  ticks = ticks * 3;
+
+  while (ticks > 0)
+  {
+    clock();
+    ticks--;
+  }
+
+  if (player_0.need_set_position())
+  {
+    player_0.set_position(pos_x);
+//printf("player_0.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
+  }
+
+  if (player_1.need_set_position())
+  {
+    player_1.set_position(pos_x);
+//printf("player_1.start_pos=%d (y=%d)\n", player_1.start_pos, pos_y);
+  }
+
+  if (missile_0.need_set_position()) { missile_0.set_position(pos_x); }
+  if (missile_1.need_set_position()) { missile_1.set_position(pos_x); }
+  if (ball.need_set_position()) { ball.set_position(pos_x); }
+}
+
+void TIA::dump()
+{
+  printf("TIA: pos_x=%d pos_y=%d  wait_for_hsync=%s\n",
+    pos_x, pos_y, wait_for_hsync() ? "on" : "off");
+
+  printf("playfield: ");
+  for (int n = 0; n < 40; n++)
+  {
+    printf("%c", (playfield.data & (1ULL << n)) != 0 ? '*' : '.');
+  }
+  printf("\n");
+
+  printf("player_0: ");
+  for (int n = 0; n < 8; n++)
+  {
+    printf("%c", (player_0.data & (1 << n)) != 0 ? '*' : '.');
+  }
+  printf("\n");
+
+  printf("player_1: ");
+  for (int n = 0; n < 8; n++)
+  {
+    printf("%c", (player_1.data & (1 << n)) != 0 ? '*' : '.');
+  }
+  printf("\n");
+}
+
+void TIA::player_size(Player &player, int value)
+{
+  int temp = value & 7;
+
+  player.set_scale(1);
+
+  switch (temp)
+  {
+    case 0:
+      // One copy.
+      break;
+    case 1:
+      // Two copies close.
+      break;
+    case 2:
+      // Two copies med.
+      break;
+    case 3:
+      // Three copies close.
+      break;
+    case 4:
+      // Two copies wide.
+      break;
+    case 5:
+      // Double size player.
+      player.set_scale(2);
+      break;
+    case 6:
+      // 3 copies medium.
+      break;
+    case 7:
+      // Quad size player.
+      player.set_scale(4);
+      break;
+  }
+}
+
 void TIA::build_playfield()
 {
   playfield.data =
@@ -294,95 +417,6 @@ void TIA::build_player_1()
   }
 
   player_1.need_update = false;
-}
-
-void TIA::clock()
-{
-  // The main playfield area starts after 68 clocks.
-  if (pos_x >= 68 && pos_y >= 40 && pos_y < 232)
-  {
-    // The point to the first bit to be displayed from PF0, PF1, PF2.
-    if (pos_x == 68) { playfield.reset(); }
-
-    draw_pixel();
-  }
-
-  pos_x++;
-
-  if (pos_x == 68 + 160)
-  {
-    if (player_0.need_update) { build_player_0(); }
-    if (player_1.need_update) { build_player_1(); }
-
-    write_regs[WSYNC] = 0;
-    pos_x = 0;
-    pos_y++;
-  }
-}
-
-void TIA::clock(int ticks)
-{
-  // Every CPU cycle is 3 pixels.
-  ticks = ticks * 3;
-
-  while (ticks > 0)
-  {
-    clock();
-    ticks--;
-  }
-
-  if (player_0.need_set_position())
-  {
-    player_0.set_position(pos_x);
-//printf("player_0.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
-  }
-
-  if (player_1.need_set_position())
-  {
-    player_1.set_position(pos_x);
-//printf("player_1.start_pos=%d (y=%d)\n", player_1.start_pos, pos_y);
-  }
-
-  if (missile_0.need_set_position()) { missile_0.set_position(pos_x); }
-  if (missile_1.need_set_position()) { missile_1.set_position(pos_x); }
-  if (ball.need_set_position()) { ball.set_position(pos_x); }
-}
-
-void TIA::player_size(Player &player, int value)
-{
-  int temp = value & 7;
-
-  player.set_scale(1);
-
-  switch (temp)
-  {
-    case 0:
-      // One copy.
-      break;
-    case 1:
-      // Two copies close.
-      break;
-    case 2:
-      // Two copies med.
-      break;
-    case 3:
-      // Three copies close.
-      break;
-    case 4:
-      // Two copies wide.
-      break;
-    case 5:
-      // Double size player.
-      player.set_scale(2);
-      break;
-    case 6:
-      // 3 copies medium.
-      break;
-    case 7:
-      // Quad size player.
-      player.set_scale(4);
-      break;
-  }
 }
 
 bool TIA::draw_playfield_fg()
@@ -488,30 +522,22 @@ void TIA::draw_pixel()
   draw_playfield_bg();
 }
 
-void TIA::dump()
+void TIA::compute_collisions()
 {
-  printf("TIA: pos_x=%d pos_y=%d  wait_for_hsync=%s\n",
-    pos_x, pos_y, wait_for_hsync() ? "on" : "off");
+  const int m0 = missile_0.is_pixel_on(pos_x);
+  const int m1 = missile_1.is_pixel_on(pos_x);
+  const int p0 = player_0.is_pixel_on(pos_x);
+  const int p1 = player_1.is_pixel_on(pos_x);
+  const int bl = ball.is_pixel_on(pos_x);
+  const int pf = playfield.is_pixel_on(pos_x);
 
-  printf("playfield: ");
-  for (int n = 0; n < 40; n++)
-  {
-    printf("%c", (playfield.data & (1ULL << n)) != 0 ? '*' : '.');
-  }
-  printf("\n");
-
-  printf("player_0: ");
-  for (int n = 0; n < 8; n++)
-  {
-    printf("%c", (player_0.data & (1 << n)) != 0 ? '*' : '.');
-  }
-  printf("\n");
-
-  printf("player_1: ");
-  for (int n = 0; n < 8; n++)
-  {
-    printf("%c", (player_1.data & (1 << n)) != 0 ? '*' : '.');
-  }
-  printf("\n");
+  read_regs[CXM0P] |= ((m0 & p1) << 7) | ((m0 & p0) << 6);
+  read_regs[CXM1P] |= ((m1 & p0) << 7) | ((m1 & p1) << 6);
+  read_regs[CXP0FB] |= ((p0 & pf) << 7) | ((p0 & bl) << 6);
+  read_regs[CXP1FB] |= ((p1 & pf) << 7) | ((p1 & bl) << 6);
+  read_regs[CXM0FB] |= ((m0 & pf) << 7) | ((m0 & bl) << 6);
+  read_regs[CXM1FB] |= ((m1 & pf) << 7) | ((m1 & bl) << 6);
+  read_regs[CXBLPF] |= ((bl & pf) << 7);
+  read_regs[CXPPMM] |= ((p0 & p1) << 7) | ((m0 & m1) << 6);
 }
 
