@@ -222,9 +222,9 @@ private:
 
   void run_compare(int reg, int data)
   {
+    status.c = reg >= data;
     reg = reg - data;
 
-    status.c = (reg & 0xff00) != 0;
     status.z = reg == 0;
     status.n = (reg & 0x80) != 0;
   }
