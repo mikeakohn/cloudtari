@@ -282,6 +282,13 @@ void TIA::clock(int ticks)
   // Every CPU cycle is 3 pixels.
   ticks = ticks * 3;
 
+#if 0
+if (player_0.need_set_position())
+{
+printf(" -- pos_x=%d\n", pos_x);
+}
+#endif
+
   while (ticks > 0)
   {
     clock();
@@ -291,7 +298,7 @@ void TIA::clock(int ticks)
   if (player_0.need_set_position())
   {
     player_0.set_position(pos_x);
-//printf("player_0.start_pos=%d (y=%d)\n", player_0.start_pos, pos_y);
+//printf("player_0.start_pos=%d (y=%d) offset=%d %d\n", player_0.start_pos, pos_y, player_0.offset, player_0.next_offset);
   }
 
   if (player_1.need_set_position())

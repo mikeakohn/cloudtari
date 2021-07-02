@@ -90,6 +90,8 @@ private:
       if (pos_x < start_pos - offset) { return false; }
       int x = (pos_x - (start_pos - offset)) / scale;
       if (x > 7) { return false; }
+//if (x == 0) { printf("pos_x=%d offset=%d start_pos=%d %d\n",
+//  pos_x, offset, start_pos, start_pos - offset); }
       return (data & (1 << x)) != 0;
     }
 

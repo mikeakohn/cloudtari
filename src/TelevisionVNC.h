@@ -44,11 +44,13 @@ private:
   int send_image_full();
   int send_image_update(int x, int y, int width, int height);
   void print_pixel_format(uint8_t *buffer);
+  void print_encoding(uint8_t *buffer);
 
   int socket_id;
   int client;
   int port;
 
+  bool needs_full_image;
   bool needs_color_table;
   int image_packet_length;
   struct timeval refresh_time;

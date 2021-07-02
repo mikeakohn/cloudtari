@@ -26,6 +26,7 @@ TelevisionVNC::TelevisionVNC() :
   socket_id{-1},
   client{-1},
   port{5900},
+  needs_full_image{true},
   needs_color_table{true}
 {
   image_packet_length = sizeof(ImagePacket) + (width * height * 4);
@@ -169,7 +170,11 @@ int TelevisionVNC::handle_events()
         vnc_recv(buffer, 3);
         count = (buffer[1] << 8) | buffer[2];
 
-        for (n = 0; n < count; n++) { vnc_recv(buffer, 4); }
+        for (n = 0; n < count; n++)
+        {
+          vnc_recv(buffer, 4);
+          print_encoding(buffer);
+        }
         break;
       case 3:
         printf("From Client: FramebufferUpdateRequest\n");
@@ -506,6 +511,8 @@ int TelevisionVNC::send_image_full()
     return -1;
   }
 
+  needs_full_image = false;
+
   return 0;
 }
 
@@ -521,7 +528,11 @@ int TelevisionVNC::send_image_update(int x, int y, int width, int height)
 
   if (x == 0 && y == 0 && width == this->width && height == this->height)
   {
-    send_image_full();
+    needs_full_image = true;
+  }
+    else
+  {
+printf("only part\n");
   }
 
   return 0;
@@ -541,5 +552,28 @@ void TelevisionVNC::print_pixel_format(uint8_t *buffer)
   printf("       red_shift: %d\n", buffer[10]);
   printf("     green_shift: %d\n", buffer[11]);
   printf("      blue_shift: %d\n", buffer[12]);
+}
+
+void TelevisionVNC::print_encoding(uint8_t *buffer)
+{
+  int *i = (int *)buffer;
+  int encoding = htonl(*i);
+
+  switch (encoding)
+  {
+    case 0: printf("  %d Raw\n", encoding); break;
+    case 1: printf("  %d CopyRect\n", encoding); break;
+    case 2: printf("  %d RRE\n", encoding); break;
+    case 4: printf("  %d CoRRE\n", encoding); break;
+    case 5: printf("  %d Hextile\n", encoding); break;
+    case 7: printf("  %d tight\n", encoding); break;
+    case 8: printf("  %d zlibhex\n", encoding); break;
+    case 15: printf("  %d TRLE\n", encoding); break;
+    case 16: printf("  %d ZRLE\n", encoding); break;
+    case 17: printf("  %d Hitachi ZYWRLE\n", encoding); break;
+    case -239: printf("  %d Cursor\n", encoding); break;
+    case -223: printf("  %d DesktopSize\n", encoding); break;
+    default: printf("  %d Unknown\n", encoding); break;
+  }
 }
 
