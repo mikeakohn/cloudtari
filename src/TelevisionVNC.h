@@ -42,7 +42,8 @@ private:
   int send_server_init();
   int send_color_table();
   int send_image_full();
-  int send_image_update(int x, int y, int width, int height);
+  int send_image_diff();
+  int send_image_update(int x, int y, int width, int height, bool incremental);
   void print_pixel_format(uint8_t *buffer);
   void print_encoding(uint8_t *buffer);
 
@@ -66,7 +67,36 @@ private:
     uint16_t height;
     int encoding_type;
     uint32_t data[];
-  } *image_packet;
+  } *image_packet[2];
+
+  int image_page;
+
+  struct FramebufferUpdate
+  {
+    uint8_t message_type;
+    uint8_t padding;
+    uint16_t number_of_rectangles;
+  };
+
+  struct UpdateRectangle
+  {
+    uint16_t x;
+    uint16_t y;
+    uint16_t width;
+    uint16_t height;
+    int encoding_type;
+  };
+
+#if 0
+  struct ScanlineChange
+  {
+    uint16_t left;
+    uint16_t right;
+  } *scanline_change;
+#endif
+
+  uint8_t *diff_buffer;
+  int diff_buffer_length;
 
   enum
   {

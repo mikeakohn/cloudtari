@@ -27,17 +27,28 @@ TelevisionVNC::TelevisionVNC() :
   client{-1},
   port{5900},
   needs_full_image{true},
-  needs_color_table{true}
+  needs_color_table{true},
+  image_page{0}
 {
   image_packet_length = sizeof(ImagePacket) + (width * height * 4);
-  image_packet = (ImagePacket *)malloc(image_packet_length);
+  image_packet[0] = (ImagePacket *)malloc(image_packet_length);
+  image_packet[1] = (ImagePacket *)malloc(image_packet_length);
 
-  memset(image_packet, 0, image_packet_length);
+  memset(image_packet[0], 0, image_packet_length);
+  memset(image_packet[1], 0, image_packet_length);
 
-  image_packet->number_of_rectangles = htons(1);
-  image_packet->width = htons(width);
-  image_packet->height = htons(height);
-  image_packet->encoding_type = htonl(ENCODING_RAW);
+  image_packet[0]->number_of_rectangles = htons(1);
+  image_packet[0]->width = htons(width);
+  image_packet[0]->height = htons(height);
+  image_packet[0]->encoding_type = htonl(ENCODING_RAW);
+
+  image_packet[1]->number_of_rectangles = htons(1);
+  image_packet[1]->width = htons(width);
+  image_packet[1]->height = htons(height);
+  image_packet[1]->encoding_type = htonl(ENCODING_RAW);
+
+  diff_buffer_length = width * height * 4;
+  diff_buffer = (uint8_t *)malloc(diff_buffer_length);
 
   memset(&refresh_time, 0, sizeof(refresh_time));
 }
@@ -45,7 +56,8 @@ TelevisionVNC::TelevisionVNC() :
 TelevisionVNC::~TelevisionVNC()
 {
   close_connection();
-  free(image_packet);
+  free(image_packet[0]);
+  free(image_packet[1]);
 }
 
 int TelevisionVNC::init()
@@ -100,7 +112,7 @@ void TelevisionVNC::clear_display()
 {
   const int length = width * height * 4;
 
-  memset(image_packet->data, 0, length);
+  memset(image_packet[image_page]->data, 0, length);
 }
 
 void TelevisionVNC::draw_pixel(int x, int y, uint32_t color)
@@ -116,12 +128,12 @@ void TelevisionVNC::draw_pixel(int x, int y, uint32_t color)
 
   if (pixel < width * height + width + 1)
   { 
-    image_packet->data[pixel + 0] = color;
-    image_packet->data[pixel + 1] = color;
-    image_packet->data[pixel + 2] = color;
-    image_packet->data[pixel + width + 0] = color;
-    image_packet->data[pixel + width + 1] = color;
-    image_packet->data[pixel + width + 2] = color;
+    image_packet[image_page]->data[pixel + 0] = color;
+    image_packet[image_page]->data[pixel + 1] = color;
+    image_packet[image_page]->data[pixel + 2] = color;
+    image_packet[image_page]->data[pixel + width + 0] = color;
+    image_packet[image_page]->data[pixel + width + 1] = color;
+    image_packet[image_page]->data[pixel + width + 2] = color;
   }
 }
 
@@ -141,7 +153,9 @@ bool TelevisionVNC::refresh()
 
   refresh_time = now;
 
-  send_image_full();
+  send_image_diff();
+
+  image_page ^= 1;
 
   return true;
 }
@@ -177,16 +191,17 @@ int TelevisionVNC::handle_events()
         }
         break;
       case 3:
-        printf("From Client: FramebufferUpdateRequest\n");
+        //printf("From Client: FramebufferUpdateRequest\n");
         vnc_recv(buffer + 1, 9);
         send_image_update(
           (buffer[2] << 8) | buffer[3],
           (buffer[4] << 8) | buffer[5],
           (buffer[6] << 8) | buffer[7],
-          (buffer[8] << 8) | buffer[9]);
+          (buffer[8] << 8) | buffer[9],
+          buffer[1]);
         break;
       case 4:
-        printf("From Client: KeyEvent\n");
+        //printf("From Client: KeyEvent\n");
         vnc_recv(buffer + 1, 7);
         key =
           (buffer[4] << 24) |
@@ -223,7 +238,7 @@ int TelevisionVNC::handle_events()
 
         break;
       case 5:
-        printf("From Client: PointerEvent\n");
+        //printf("From Client: PointerEvent\n");
         vnc_recv(buffer + 1, 5);
         break;
       case 6:
@@ -505,7 +520,7 @@ int TelevisionVNC::send_image_full()
 {
   if (needs_color_table) { return 0; }
 
-  if (vnc_send((const uint8_t *)image_packet, image_packet_length) != image_packet_length)
+  if (vnc_send((const uint8_t *)image_packet[image_page], image_packet_length) != image_packet_length)
   {
     printf("Error: Send packet %s:%d\n", __FILE__, __LINE__);
     return -1;
@@ -516,11 +531,107 @@ int TelevisionVNC::send_image_full()
   return 0;
 }
 
-int TelevisionVNC::send_image_update(int x, int y, int width, int height)
+int TelevisionVNC::send_image_diff()
+{
+  int line_mismatch_count = 0;
+  int old_page = image_page ^ 1;
+  int mismatch_start = 0;
+  bool in_mismatch = false;
+  int diff_ptr = sizeof(FramebufferUpdate);
+  FramebufferUpdate *frame_buffer_update = (FramebufferUpdate *)diff_buffer;
+
+  memset(frame_buffer_update, 0, sizeof(FramebufferUpdate));
+
+  for (int y = 0; y < height; y += 2)
+  {
+    int line = y * width;
+    bool is_mismatch = false;
+
+    for (int x = 0; x < width; x += 3)
+    {
+      is_mismatch =
+        image_packet[image_page]->data[line + x] !=
+        image_packet[old_page]->data[line + x];
+
+      if (is_mismatch)
+      {
+        line_mismatch_count++;
+
+        if (line_mismatch_count > height / 6) { return send_image_full(); }
+        if (!in_mismatch) { mismatch_start = y; in_mismatch = true; }
+
+        break;
+      }
+    }
+
+    // If mismatch flag is set and this is the last line in the image or
+    // no longer in a mismatch.
+    if (in_mismatch)
+    {
+      if (y == height - 2 || is_mismatch == false)
+      {
+        frame_buffer_update->number_of_rectangles++;
+
+        UpdateRectangle *update_rectangle =
+          (UpdateRectangle *)(diff_buffer + diff_ptr);
+
+        int copy_height = y - mismatch_start;
+
+        if (y == height - 2)
+        {
+          copy_height = height - mismatch_start;
+        }
+
+        update_rectangle->x = htons(0);
+        update_rectangle->y = htons(mismatch_start);
+        update_rectangle->width = htons(width);
+        update_rectangle->height = htons(copy_height);
+        update_rectangle->encoding_type = htons(0);
+
+        diff_ptr += sizeof(UpdateRectangle);
+
+        int copy_size = width * copy_height * 4;
+
+        if (diff_ptr + copy_size > diff_buffer_length)
+        {
+          return send_image_full();
+        }
+
+        memcpy(
+          diff_buffer + diff_ptr,
+          &image_packet[image_page]->data[mismatch_start * width],
+          copy_size);
+
+        diff_ptr += copy_size;
+
+        in_mismatch = false;
+      }
+    }
+  }
+
+  if (line_mismatch_count == 0) { return 0; }
+
+  frame_buffer_update->number_of_rectangles =
+    htons(frame_buffer_update->number_of_rectangles);
+
+  if (vnc_send(diff_buffer, diff_ptr) != diff_ptr)
+  {
+    printf("Error: Send packet %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
+  return 0;
+}
+
+int TelevisionVNC::send_image_update(
+  int x,
+  int y,
+  int width,
+  int height,
+  bool incremental)
 {
   if (needs_color_table)
   {
-    //if (send_color_table() != 0) { return -1; }
     needs_color_table = false;
   }
 
@@ -528,11 +639,8 @@ int TelevisionVNC::send_image_update(int x, int y, int width, int height)
 
   if (x == 0 && y == 0 && width == this->width && height == this->height)
   {
+    if (incremental) { return 0; }
     needs_full_image = true;
-  }
-    else
-  {
-printf("only part\n");
   }
 
   return 0;
