@@ -21,7 +21,7 @@ OBJECTS= \
   TelevisionVNC.o
 
 default: $(OBJECTS)
-	$(CXX) -o ../moln_spelare ../src/moln_spelare.cxx \
+	$(CXX) -o ../cloudtari ../src/cloudtari.cxx \
 	  $(OBJECTS) \
 	  $(CFLAGS) $(LDFLAGS)
 
