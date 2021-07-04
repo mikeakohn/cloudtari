@@ -333,9 +333,9 @@ private:
   void store_absolute_x(int data, int &cycles)
   {
     int a = memory_bus->read16(pc);
-    cycles = 4;
+    cycles = 5;
     int address = a + reg_x;
-    if (!same_page(address, a)) { cycles++; }
+    //if (!same_page(address, a)) { cycles++; }
     pc += 2;
     memory_bus->write(address, data);
   }
@@ -343,9 +343,9 @@ private:
   void store_absolute_y(int data, int &cycles)
   {
     int a = memory_bus->read16(pc);
-    cycles = 4;
+    cycles = 5;
     int address = a + reg_y;
-    if (!same_page(address, a)) { cycles++; }
+    //if (!same_page(address, a)) { cycles++; }
     pc += 2;
     memory_bus->write(address, data);
   }

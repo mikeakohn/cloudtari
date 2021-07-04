@@ -514,8 +514,8 @@ int M6502::execute_instruction()
       return 3;
 
     case 0x88:     //  DEY <Implied>
-      reg_y--;
-      set_flags(reg_y);
+      reg_y = (reg_y - 1) & 0xff;
+      set_load_flags(reg_y);
       return 2;
 
     case 0x8a:     //  TXA
@@ -570,7 +570,7 @@ int M6502::execute_instruction()
 
     case 0x99:     //  STA Absolute, Y
       store_absolute_y(reg_a, cycles);
-      return cycles;
+      return 5;
 
     case 0x9a:     //  TXS
       sp = reg_x;
@@ -578,7 +578,7 @@ int M6502::execute_instruction()
 
     case 0x9d:     //  STA Absolute, X
       store_absolute_x(reg_a, cycles);
-      return cycles;
+      return 5;
 
     case 0xa0:     //  LDY #Immediate
       reg_y = read_immediate();
