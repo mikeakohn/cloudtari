@@ -147,5 +147,6 @@ int TelevisionHttp::send_index_html()
 
 int TelevisionHttp::send_gif()
 {
+  return 0;
 }
 

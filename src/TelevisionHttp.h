@@ -34,6 +34,7 @@ public:
 private:
   int read_http();
   int send_index_html();
+  int send_gif();
 
 #if 0
   int net_open(int port);

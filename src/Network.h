@@ -24,6 +24,7 @@ protected:
   void net_close();
   int net_send(const uint8_t *buffer, int len);
   int net_recv(uint8_t *buffer, int len, bool wait_for_full_buffer = true);
+  bool net_has_data();
 
   int socket_id;
   int client;

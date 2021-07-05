@@ -155,3 +155,28 @@ int Network::net_recv(uint8_t *buffer, int length, bool wait_for_full_buffer)
   return bytes_received;
 }
 
+bool Network::net_has_data()
+{
+  struct timeval tv;
+  fd_set readset;
+
+  FD_ZERO(&readset);
+  FD_SET(client, &readset);
+
+  tv.tv_sec = 0;
+  tv.tv_usec = 0;
+
+  int n = select(client + 1, &readset, NULL, NULL, &tv);
+
+  if (n == -1)
+  {
+    if (errno == EINTR) { return false; }
+
+    perror("Problem with select in vnc_recv");
+    net_close();
+    return false;
+  }
+
+  return FD_ISSET(client, &readset);
+}
+

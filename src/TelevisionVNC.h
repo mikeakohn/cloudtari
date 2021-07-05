@@ -15,9 +15,10 @@
 #include <stdint.h>
 #include <sys/time.h>
 
+#include "Network.h"
 #include "Television.h"
 
-class TelevisionVNC : public Television
+class TelevisionVNC : public Television, public Network
 {
 public:
   TelevisionVNC();
@@ -32,10 +33,7 @@ public:
   virtual void set_port(int value) { port = value; };
 
 private:
-  int vnc_send(const uint8_t *buffer, int len);
-  int vnc_recv(uint8_t *buffer, int len);
-  bool vnc_has_data();
-  void close_connection();
+  void set_pixel(int x, int y, uint32_t color);
   int send_protocol_version();
   int get_client_protocol_version();
   int send_security();
@@ -48,10 +46,6 @@ private:
   void print_pixel_format(uint8_t *buffer);
   void print_encoding(uint8_t *buffer);
 
-  int socket_id;
-  int client;
-  int port;
-
   bool needs_full_image;
   bool needs_color_table;
   int image_packet_length;
@@ -59,9 +53,9 @@ private:
 
   struct ImagePacket
   {
-    uint8_t message_type; 
-    uint8_t padding; 
-    uint16_t number_of_rectangles; 
+    uint8_t message_type;
+    uint8_t padding;
+    uint16_t number_of_rectangles;
     uint16_t x;
     uint16_t y;
     uint16_t width;
@@ -87,14 +81,6 @@ private:
     uint16_t height;
     int encoding_type;
   };
-
-#if 0
-  struct ScanlineChange
-  {
-    uint16_t left;
-    uint16_t right;
-  } *scanline_change;
-#endif
 
   uint8_t *diff_buffer;
   int diff_buffer_length;
