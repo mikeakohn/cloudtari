@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 
+#include "GifCompressor.h"
 #include "Network.h"
 #include "Television.h"
 
@@ -36,18 +37,8 @@ private:
   int send_index_html();
   int send_gif();
 
-#if 0
-  int net_open(int port);
-  void net_close();
-  int net_send(const uint8_t *buffer, int len);
-  int net_recv(uint8_t *buffer, int len);
-
-
-  int socket_id;
-  int client;
-  int port;
-#endif
   uint8_t *image;
+  GifCompressor *gif_compressor;
 
   struct timeval refresh_time;
 

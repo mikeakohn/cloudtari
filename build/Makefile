@@ -10,6 +10,7 @@ VPATH=../src
 OBJECTS= \
   ColorTable.o \
   Disassembler.o \
+  GifCompressor.o \
   M6502.o \
   MemoryBus.o \
   Network.o \

@@ -18,6 +18,7 @@ class ColorTable
 {
 public:
   static uint32_t get_color(int index);
+  static uint32_t *get_table() { return colors; }
 
 private:
   ColorTable() { }

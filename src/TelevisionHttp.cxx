@@ -19,6 +19,10 @@
 
 TelevisionHttp::TelevisionHttp()
 {
+  gif_compressor = new GifCompressor();
+  gif_compressor->set_width(width);
+  gif_compressor->set_height(height);
+
   image = (uint8_t *)malloc(width * height);
 
   memset(&refresh_time, 0, sizeof(refresh_time));
@@ -28,6 +32,8 @@ TelevisionHttp::~TelevisionHttp()
 {
   net_close();
   free(image);
+
+  delete gif_compressor;
 }
 
 int TelevisionHttp::init()
@@ -75,6 +81,16 @@ void TelevisionHttp::draw_pixel(int x, int y, uint8_t color)
 
 bool TelevisionHttp::refresh()
 {
+  gif_compressor->compress(image, ColorTable::get_table());
+
+  uint8_t *gif = gif_compressor->get_gif_data();
+  int length = gif_compressor->get_gif_length();
+
+FILE *fp = fopen("file.gif", "wb");
+fwrite(gif, 1, length, fp);
+fclose(fp);
+exit(1);
+
   return true;
 }
 
