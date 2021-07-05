@@ -83,10 +83,11 @@ int main(int argc, char *argv[])
     else
   if (strcmp(argv[2], "break") == 0)
   {
-    television = new TelevisionVNC();
+    television = new TelevisionNull();
 
     int address = 0xf000;
-    if (argc > 3) { address = atoi(argv[3]); }
+    if (argc > 3) { address = strtol(argv[3], NULL, 0); }
+    debug = true;
     m6502->set_breakpoint(address);
   }
     else
