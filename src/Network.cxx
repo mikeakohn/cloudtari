@@ -121,6 +121,7 @@ int Network::net_recv(uint8_t *buffer, int length, bool wait_for_full_buffer)
 {
   struct timeval tv;
   fd_set readset;
+  int empty_count = 0;
 
   int bytes_received = 0;
 
@@ -144,10 +145,19 @@ int Network::net_recv(uint8_t *buffer, int length, bool wait_for_full_buffer)
 
     if (n == 0) { return -3; }
 
+    if (!FD_ISSET(client, &readset)) { continue; }
+
     n = recv(client, buffer + bytes_received, length - bytes_received, 0);
     if (n < 0) { return -4; }
 
     bytes_received += n;
+
+    if (bytes_received == 0)
+    {
+      empty_count++;
+
+      if (empty_count == 1) { continue; }
+    }
 
     if (!wait_for_full_buffer) { break; }
   }

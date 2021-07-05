@@ -36,13 +36,16 @@ private:
   int read_http();
   int send_index_html();
   int send_gif();
+  int send_404();
 
   uint8_t *image;
+  uint8_t *gif;
+  int gif_length;
   GifCompressor *gif_compressor;
+  char query_string[128];
+  char filename[128];
 
   struct timeval refresh_time;
-
-
 };
 
 #endif
