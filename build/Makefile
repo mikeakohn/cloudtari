@@ -12,10 +12,12 @@ OBJECTS= \
   Disassembler.o \
   M6502.o \
   MemoryBus.o \
+  Network.o \
   PIA.o \
   ROM.o \
   TIA.o \
   Television.o \
+  TelevisionHttp.o \
   TelevisionNull.o \
   TelevisionSDL.o \
   TelevisionVNC.o

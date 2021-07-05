@@ -17,6 +17,7 @@
 #include "M6502.h"
 #include "MemoryBus.h"
 #include "ROM.h"
+#include "TelevisionHttp.h"
 #include "TelevisionNull.h"
 #include "TelevisionSDL.h"
 #include "TelevisionVNC.h"
@@ -41,6 +42,7 @@ int main(int argc, char *argv[])
       "          null\n"
       "          sdl\n"
       "          vnc <port>\n"
+      "          http <port>\n"
       "          debug\n"
       "          break <address>\n"
       "          timer <start_address> <end_address>\n"
@@ -69,6 +71,16 @@ int main(int argc, char *argv[])
   {
     television = new TelevisionVNC();
 
+    if (argc > 3) { port = atoi(argv[3]); }
+
+    television->set_port(port);
+  }
+    else
+  if (strcmp(argv[2], "http") == 0)
+  {
+    television = new TelevisionHttp();
+
+    port = 8080;
     if (argc > 3) { port = atoi(argv[3]); }
 
     television->set_port(port);

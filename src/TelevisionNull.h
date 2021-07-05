@@ -25,6 +25,7 @@ public:
   virtual int init();
   virtual void clear_display();
   virtual void draw_pixel(int x, int y, uint32_t color);
+  virtual void draw_pixel(int x, int y, uint8_t color);
   virtual bool refresh();
   virtual int handle_events();
 

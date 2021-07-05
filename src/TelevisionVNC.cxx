@@ -137,6 +137,10 @@ void TelevisionVNC::draw_pixel(int x, int y, uint32_t color)
   }
 }
 
+void TelevisionVNC::draw_pixel(int x, int y, uint8_t color)
+{
+}
+
 bool TelevisionVNC::refresh()
 {
   struct timeval now;

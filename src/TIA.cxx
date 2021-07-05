@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ColorTable.h"
+//#include "ColorTable.h"
 #include "TIA.h"
 
 // Atari 2600 has:
@@ -98,16 +98,16 @@ void TIA::write_memory(int address, uint8_t value)
       missile_1.set_width(1 << ((value >> 4) & 0x3));
       break;
     case COLUP0:
-      colors.player_0 = ColorTable::get_color(value);
+      colors.player_0 = value;
       break;
     case COLUP1:
-      colors.player_1 = ColorTable::get_color(value);
+      colors.player_1 = value;
       break;
     case COLUBK:
-      colors.background = ColorTable::get_color(value);
+      colors.background = value;
       break;
     case COLUPF:
-      colors.playfield = ColorTable::get_color(value);
+      colors.playfield = value;
       break;
     case CTRLPF:
       write_regs[CTRLPF] = value;
