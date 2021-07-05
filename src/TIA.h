@@ -71,7 +71,8 @@ private:
       need_update{false},
       scale{1},
       start_pos{0},
-      offset{0}
+      offset{0},
+      next_offset{0}
     {
     }
 
@@ -149,7 +150,7 @@ private:
   };
 
   int get_x() { return pos_x - 68; }
-  int get_y() { return pos_y - 37; }
+  int get_y() { return pos_y - 40; }
   void player_size(Player &player, int value);
   void build_playfield();
   void build_player_0();
@@ -176,6 +177,7 @@ private:
 
   int pos_x;
   int pos_y;
+  bool hsync_latch;
 
   Playfield playfield;
   Player player_0;

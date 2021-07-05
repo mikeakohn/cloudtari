@@ -22,7 +22,7 @@
 // Total Resolution: 228x262
 // Visible Resolution: 160x192
 
-TIA::TIA() : pos_x{0}, pos_y{0}
+TIA::TIA() : pos_x{0}, pos_y{0}, hsync_latch{false}
 {
   for (int n = 0; n < 256; n++)
   {
@@ -44,6 +44,7 @@ void TIA::reset()
 {
   pos_x = 0;
   pos_y = 0;
+  hsync_latch = false;
 
   playfield.reset();
 
@@ -67,10 +68,6 @@ void TIA::write_memory(int address, uint8_t value)
 
   switch (address)
   {
-    case WSYNC:
-      write_regs[WSYNC] = 1;
-//printf("WSYNC (%d, %d)\n", pos_x, pos_y);
-      break;
     case VSYNC:
       if ((value & 2) == 2)
       {
@@ -78,6 +75,19 @@ void TIA::write_memory(int address, uint8_t value)
         pos_x = 0;
         pos_y = 0;
       }
+
+      write_regs[VSYNC] = value;
+      break;
+    case VBLANK:
+      break;
+    case WSYNC:
+      //write_regs[WSYNC] = 1;
+      hsync_latch = true;
+      break;
+    case RSYNC:
+      // "This address resets the horizontal sync counter to define the
+      // beginning of horizontal blank time, and is used in chip testing."
+      pos_x = 0;
       break;
     case NUSIZ0:
       player_size(player_0, value);
@@ -104,7 +114,6 @@ void TIA::write_memory(int address, uint8_t value)
       ball.set_width(1 << ((value >> 4) & 0x3));
       break;
     case REFP0:
-//printf("REFP0 %d\n", value);
       write_regs[REFP0] = value;
       build_player_0();
       break;
@@ -148,8 +157,8 @@ void TIA::write_memory(int address, uint8_t value)
     case AUDV1:
       break;
     case GRP0:
-      //printf("GRP0 %02x (%d, %d)\n", value, pos_x, pos_y);
       write_regs[GRP0] = value;
+
       if (!player_0.vertical_delay)
       {
         build_player_0();
@@ -160,8 +169,8 @@ void TIA::write_memory(int address, uint8_t value)
       }
       break;
     case GRP1:
-      //printf("GRP1 %02x (%d, %d)\n", value, pos_x, pos_y);
       write_regs[GRP1] = value;
+
       if (!player_1.vertical_delay)
       {
         build_player_1();
@@ -196,11 +205,9 @@ void TIA::write_memory(int address, uint8_t value)
       break;
     case HMP0:
       player_0.set_offset(compute_offset(value));
-//printf("HMP0  0x%02x offset=%d (%d,%d)\n", value, player_0.next_offset, pos_x, pos_y);
       break;
     case HMP1:
       player_1.set_offset(compute_offset(value));
-//printf("HMP1  0x%02x offset=%d (%d,%d)\n", value, player_1.next_offset, pos_x, pos_y);
       break;
     case HMM0:
       missile_0.set_offset(compute_offset(value));
@@ -271,7 +278,8 @@ void TIA::clock()
     if (player_0.need_update) { build_player_0(); }
     if (player_1.need_update) { build_player_1(); }
 
-    write_regs[WSYNC] = 0;
+    if (!hsync_latch) { write_regs[WSYNC] = 0; }
+
     pos_x = 0;
     pos_y++;
   }
@@ -282,34 +290,25 @@ void TIA::clock(int ticks)
   // Every CPU cycle is 3 pixels.
   ticks = ticks * 3;
 
-#if 0
-if (player_0.need_set_position())
-{
-printf(" -- pos_x=%d\n", pos_x);
-}
-#endif
-
   while (ticks > 0)
   {
     clock();
     ticks--;
   }
 
-  if (player_0.need_set_position())
-  {
-    player_0.set_position(pos_x);
-//printf("player_0.start_pos=%d (y=%d) offset=%d %d\n", player_0.start_pos, pos_y, player_0.offset, player_0.next_offset);
-  }
+  // For some reason (according to some forum) the TIA delays setting the
+  // X position for player sprites by 5 TIA clocks and ball / missile by 4.
+  if (player_0.need_set_position()) { player_0.set_position(pos_x + 5); }
+  if (player_1.need_set_position()) { player_1.set_position(pos_x + 5); }
+  if (missile_0.need_set_position()) { missile_0.set_position(pos_x + 4); }
+  if (missile_1.need_set_position()) { missile_1.set_position(pos_x + 4); }
+  if (ball.need_set_position()) { ball.set_position(pos_x + 4); }
 
-  if (player_1.need_set_position())
+  if (hsync_latch)
   {
-    player_1.set_position(pos_x);
-//printf("player_1.start_pos=%d (y=%d)\n", player_1.start_pos, pos_y);
+    write_regs[WSYNC] = 1;
+    hsync_latch = false;
   }
-
-  if (missile_0.need_set_position()) { missile_0.set_position(pos_x); }
-  if (missile_1.need_set_position()) { missile_1.set_position(pos_x); }
-  if (ball.need_set_position()) { ball.set_position(pos_x); }
 }
 
 void TIA::dump()
@@ -329,14 +328,20 @@ void TIA::dump()
   {
     printf("%c", (player_0.data & (1 << n)) != 0 ? '*' : '.');
   }
-  printf("\n");
+  printf(" x=%d offset=%d (next=%d)\n",
+    player_0.start_pos,
+    player_0.offset,
+    player_0.next_offset);
 
   printf("player_1: ");
   for (int n = 0; n < 8; n++)
   {
     printf("%c", (player_1.data & (1 << n)) != 0 ? '*' : '.');
   }
-  printf("\n");
+  printf(" x=%d offset=%d (next=%d)\n",
+    player_1.start_pos,
+    player_1.offset,
+    player_1.next_offset);
 }
 
 void TIA::player_size(Player &player, int value)
