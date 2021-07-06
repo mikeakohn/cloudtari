@@ -97,11 +97,9 @@ int TelevisionHttp::handle_events()
 {
   if (net_has_data())
   {
-static int blah = 0;
-printf("handle_event() %d\n", blah++);
     read_http();
 
-printf("filename=%s\n", filename);
+//printf("filename=%s\n", filename);
 
     if (strcmp(filename, "/") == 0)
     {
@@ -114,7 +112,6 @@ printf("filename=%s\n", filename);
     }
       else
     {
-printf("send 404\n");
       send_404();
     }
 
@@ -148,7 +145,7 @@ int TelevisionHttp::read_http()
       if (buffer[n] == '\n')
       {
         line[ptr] = 0;
-printf("line=%s\n", line);
+//printf("line=%s\n", line);
         ptr = 0;
 
         if (line[0] == 0) { end_of_headers = true; }
@@ -212,13 +209,13 @@ int TelevisionHttp::send_index_html()
     "}\n"
     "function refresh_image()\n"
     "{\n"
-    "console.log('refresh_image()');\n"
+    //"console.log('refresh_image()');\n"
     "var atari = document.getElementById('atari');\n"
     "if (atari.complete)\n"
     "{\n"
     "atari.src = 'image.gif?' + new Date().getTime();\n"
-    "setTimeout(refresh_image, 33);\n"
     "}\n"
+    "setTimeout(refresh_image, 33);\n"
     "}\n"
     "</script>\n"
     "<table width=100%% height=100%%>"
