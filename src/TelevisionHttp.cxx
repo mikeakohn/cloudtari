@@ -201,7 +201,7 @@ int TelevisionHttp::send_index_html()
 {
   std::string header;
   const char *page =
-    "<html>\n<body onload='init();'>\n"
+    "<html>\n<body onload='init();' bgcolor='#000000'>\n"
     "<script type='text/javascript'>\n"
     "function init()\n"
     "{\n"

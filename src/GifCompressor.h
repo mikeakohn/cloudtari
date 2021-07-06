@@ -91,6 +91,8 @@ private:
     *(data + ptr + 1) = value >> 8;
   }
 
+  inline int compute_bits_per_pixel(int max_colors);
+
   GifHeader gif_header;
   uint8_t *data;
   int data_length;

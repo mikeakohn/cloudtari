@@ -37,9 +37,41 @@ GifCompressor::~GifCompressor()
 int GifCompressor::compress(uint8_t *image, uint32_t *color_table)
 {
   int ptr = 6, i;
-  const int color_resolution = 7;
-  const int bits_per_pixel = 7;
-  const int max_colors = 128;
+
+  // Remap the colors from the 128 color palette to a smaller palette
+  // so the GIF compresses more.
+  uint8_t color_map[256];
+  uint8_t color_used[256];
+  uint32_t gif_palette[256];
+
+  memset(color_map, 0, sizeof(color_map));
+  memset(color_used, 0, sizeof(color_used));
+
+  int length = gif_header.width * gif_header.height;
+  int max_colors = 0;
+
+  // Remap colors to GIF palette.
+  for (i = 0; i < length; i++)
+  {
+    int color = image[i];
+
+    if (color_used[color]) { continue; }
+
+    color_map[color] = max_colors;
+    color_used[color] = 1;
+    gif_palette[max_colors] = color_table[color];
+
+    max_colors++;
+  }
+
+  // FIXME: Why is this happening?
+  if (max_colors < 2) { max_colors = 4; }
+
+  // Compute bits per pixel and max colors for that.
+  int bits_per_pixel = compute_bits_per_pixel(max_colors);
+  const int color_resolution = bits_per_pixel;
+  max_colors = 1 << bits_per_pixel;
+//printf("max_colors=%d bits_per_pixel=%d\n", max_colors, bits_per_pixel);
 
   // Copy GifHeader (Logical Screen Descriptor) to memory.
   set_uint16(data, ptr + 0, gif_header.width);
@@ -52,9 +84,9 @@ int GifCompressor::compress(uint8_t *image, uint32_t *color_table)
   // Global Color Map (palettes).
   for (i = 0; i < max_colors; i++)
   {
-    data[ptr++] = (color_table[i] >> 16) & 0xff;
-    data[ptr++] = (color_table[i] >> 8) & 0xff;
-    data[ptr++] =  color_table[i] & 0xff;
+    data[ptr++] = (gif_palette[i] >> 16) & 0xff;
+    data[ptr++] = (gif_palette[i] >> 8) & 0xff;
+    data[ptr++] =  gif_palette[i] & 0xff;
   }
 
   // Image Descriptor Block.
@@ -70,7 +102,7 @@ int GifCompressor::compress(uint8_t *image, uint32_t *color_table)
   int clear_code = max_colors;
   int eof_code = max_colors + 1;
 
-  data[ptr++] = code_size; 
+  data[ptr++] = code_size;
 
   // Setup LZW tree.
   CompressNode node[4097];
@@ -95,8 +127,7 @@ int GifCompressor::compress(uint8_t *image, uint32_t *color_table)
   bit_stream.append(clear_code, curr_code_size);
 
   int image_ptr = 0;
-  uint8_t color = image[image_ptr++];
-  int length = gif_header.width * gif_header.height;
+  uint8_t color = color_map[image[image_ptr++]];
   int block_ptr;
 
   block_ptr = ptr;
@@ -107,7 +138,7 @@ int GifCompressor::compress(uint8_t *image, uint32_t *color_table)
 
   while (image_ptr < length)
   {
-    color = image[image_ptr++];
+    color = color_map[image[image_ptr++]];
 
     if (node[curr_code].down == -1)
     {
@@ -205,5 +236,24 @@ int GifCompressor::compress(uint8_t *image, uint32_t *color_table)
   gif_length = ptr;
 
   return 0;
+}
+
+int GifCompressor::compute_bits_per_pixel(int max_colors)
+{
+  uint8_t counts[16] =
+  {
+    0, 1, 2, 2, 3, 3, 3, 3,
+    4, 4, 4, 4, 4, 4, 4, 4,
+  };
+
+  max_colors -= 1;
+
+  int upper = counts[max_colors >> 4];
+  int lower = counts[max_colors & 0xf];
+
+  if (upper != 0) { return upper + 4; }
+  if (lower == 0) { lower = 1; }
+
+  return lower;
 }
 
