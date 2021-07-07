@@ -61,6 +61,7 @@ int ROM::load(const char *filename)
 
   if (size == 2048)
   {
+    memcpy(memory +    0, full, 2048);
     memcpy(memory + 2048, full, 2048);
   }
     else

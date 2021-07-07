@@ -437,7 +437,7 @@ int M6502::execute_instruction()
 
     case 0x6c:     //  JMP (Indirect)
       data = read_address();
-      pc = memory_bus->read16(pc);
+      pc = memory_bus->read16(data);
       return 5;
 
     case 0x6d:     //  ADC Absolute

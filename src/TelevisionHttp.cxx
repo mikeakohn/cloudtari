@@ -62,18 +62,18 @@ void TelevisionHttp::draw_pixel(int x, int y, uint32_t color)
 void TelevisionHttp::draw_pixel(int x, int y, uint8_t color)
 {
   int pixel;
-  
+
   x = x * 3;
   y = y * 2;
-  
+
   if (x < 0 || y < 0) { return; }
-  
+
   pixel = (y * width) + x;
- 
+
   color = color >> 1;
- 
+
   if (pixel < width * height + width + 1)
-  { 
+  {
     image[pixel + 0] = color;
     image[pixel + 1] = color;
     image[pixel + 2] = color;
@@ -172,7 +172,7 @@ int TelevisionHttp::read_http()
             while (line[ptr] != 0)
             {
               if (line[ptr] == ' ') { break; }
-  
+
               query_string[n++] = line[ptr++];
               if (n >= sizeof(query_string) - 1) { break; }
             }
