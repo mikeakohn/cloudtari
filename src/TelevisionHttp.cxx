@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/time.h>
 #include <string>
 
 #include "ColorTable.h"
@@ -90,6 +92,20 @@ bool TelevisionHttp::refresh()
   gif = gif_compressor->get_gif_data();
   gif_length = gif_compressor->get_gif_length();
 
+  struct timeval now;
+
+  gettimeofday(&now, NULL);
+  long time_diff = now.tv_usec - refresh_time.tv_usec;
+  while(time_diff < 0) { now.tv_sec--; time_diff += 1000000; }
+  time_diff += (now.tv_sec - refresh_time.tv_sec) * 1000000;
+
+  if (time_diff < 16000)
+  {
+    usleep(16000 - time_diff);
+  }
+
+  refresh_time = now;
+
   return true;
 }
 
@@ -99,7 +115,17 @@ int TelevisionHttp::handle_events()
   {
     read_http();
 
-//printf("filename=%s\n", filename);
+    // The query string from the browser is ?keys#timestamp.
+    // The timestamp is unfortunate since it seems the browser is ignoring
+    // the cache expire headers.
+    int n = 0;
+
+    while (query_string[n] != 0)
+    {
+      if (query_string[n] == '#') { break; }
+      key_queue.append(query_string[n]);
+      n++;
+    }
 
     if (strcmp(filename, "/") == 0)
     {
@@ -117,6 +143,28 @@ int TelevisionHttp::handle_events()
 
     filename[0] = 0;
     query_string[0] = 0;
+  }
+
+  if (!key_queue.is_empty())
+  {
+    char c = key_queue.get_next();
+    switch (c)
+    {
+      case 's': return KEY_DOWN_DOWN;
+      case 'w': return KEY_UP_DOWN;
+      case 'a': return KEY_LEFT_DOWN;
+      case 'd': return KEY_RIGHT_DOWN;
+      case 'f': return KEY_FIRE_DOWN;
+      case 'e': return KEY_RESET_DOWN;
+      case 'c': return KEY_SELECT_DOWN;
+      case 'S': return KEY_DOWN_UP;
+      case 'W': return KEY_UP_UP;
+      case 'A': return KEY_LEFT_UP;
+      case 'D': return KEY_RIGHT_UP;
+      case 'F': return KEY_FIRE_UP;
+      case 'E': return KEY_RESET_UP;
+      case 'C': return KEY_SELECT_UP;
+    }
   }
 
   return 0;
@@ -145,13 +193,13 @@ int TelevisionHttp::read_http()
       if (buffer[n] == '\n')
       {
         line[ptr] = 0;
-//printf("line=%s\n", line);
         ptr = 0;
 
         if (line[0] == 0) { end_of_headers = true; }
 
         if (strncmp(line, "GET /", 5) == 0)
         {
+//printf("line=%s\n", line);
           int ptr = 4;
           uint32_t n = 0;
 
@@ -203,9 +251,40 @@ int TelevisionHttp::send_index_html()
   const char *page =
     "<html>\n<body onload='init();' bgcolor='#000000'>\n"
     "<script type='text/javascript'>\n"
+    "var queue = '';\n"
     "function init()\n"
     "{\n"
-    "setTimeout(refresh_image, 5000);\n"
+      "setTimeout(refresh_image, 2000);\n"
+      "window.addEventListener('keydown', function(event)\n"
+      "{\n"
+        "if (event.defaultPrevented) { return; }\n"
+        "switch(event.keyCode)\n"
+        "{\n"
+          "case 83: queue += 's'; break;\n"
+          "case 87: queue += 'w'; break;\n"
+          "case 65: queue += 'a'; break;\n"
+          "case 68: queue += 'd'; break;\n"
+          "case 32: queue += 'f'; break;\n"
+          "case 13: queue += 'e'; break;\n"
+          "case 67: queue += 'c'; break;\n"
+          "default: break;\n"
+        "}\n"
+      "});\n"
+      "window.addEventListener('keyup', function(event)\n"
+      "{\n"
+        "if (event.defaultPrevented) { return; }\n"
+        "switch(event.keyCode)\n"
+        "{\n"
+          "case 83: queue += 'S'; break;\n"
+          "case 87: queue += 'W'; break;\n"
+          "case 65: queue += 'A'; break;\n"
+          "case 68: queue += 'D'; break;\n"
+          "case 32: queue += 'F'; break;\n"
+          "case 13: queue += 'E'; break;\n"
+          "case 67: queue += 'C'; break;\n"
+          "default: break;\n"
+        "}\n"
+      "});\n"
     "}\n"
     "function refresh_image()\n"
     "{\n"
@@ -213,14 +292,14 @@ int TelevisionHttp::send_index_html()
     "var atari = document.getElementById('atari');\n"
     "if (atari.complete)\n"
     "{\n"
-    "atari.src = 'image.gif?' + new Date().getTime();\n"
+    "atari.src = 'image.gif?' + queue + '#' + new Date().getTime();\n"
+    "queue = '';\n"
     "}\n"
     "setTimeout(refresh_image, 33);\n"
     "}\n"
     "</script>\n"
     "<table width=100%% height=100%%>"
     "<tr><td width=100%% height=100%% align='center'>"
-    //"<img src='image.gif' id='atari' onload='setTimeout(refresh_image, 1000);'></td></tr>"
     "<img src='image.gif' id='atari'></td></tr>"
     "</body>\n</html>\n\n";
 

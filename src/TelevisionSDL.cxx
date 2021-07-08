@@ -16,7 +16,6 @@ TelevisionSDL::TelevisionSDL()
 {
   SDL_Init(SDL_INIT_EVERYTHING);
 
-  //window = DL_SetVideoMode(640, width, 32, SDL_SWSURFACE);
   window = SDL_CreateWindow(
     "Debug",
     SDL_WINDOWPOS_UNDEFINED,

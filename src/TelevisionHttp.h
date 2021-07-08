@@ -13,6 +13,7 @@
 #define TELEVISION_HTTP_H
 
 #include <stdint.h>
+#include <string.h>
 
 #include "GifCompressor.h"
 #include "Network.h"
@@ -46,6 +47,36 @@ private:
   char filename[128];
 
   struct timeval refresh_time;
+
+  struct KeyQueue
+  {
+    KeyQueue() : count{0}, head{0}, tail{0}
+    {
+      memset(queue, 0, sizeof(queue));
+    }
+
+    bool is_empty() { return count == 0; }
+    bool is_full() { return count == sizeof(queue); }
+
+    char get_next()
+    {
+      char c = queue[head++];
+      if (head == sizeof(queue)) { head = 0; }
+      count--;
+      return c;
+    }
+
+    void append(char c)
+    {
+      if (is_full()) { return; }
+      queue[tail++] = c;
+      if (tail == sizeof(queue)) { tail = 0; }
+      count++;
+    }
+
+    int count, head, tail;
+    char queue[32];
+  } key_queue;
 };
 
 #endif
