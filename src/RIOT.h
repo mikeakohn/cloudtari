@@ -60,8 +60,8 @@ private:
   const int SWCHA = 0x280;
   const int SWACNT = 0x281;
   const int SWCHB = 0x282;
-  const int SWBCNT = 0x281;
-  const int INTIM = 0x284;
+  //const int SWBCNT = 0x281;
+  //const int INTIM = 0x284;
 
   int prescale;
   int prescale_shift;

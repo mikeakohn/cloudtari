@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     debug = true;
     m6502->set_debug();
 
-    int address_start, address_end;
+    int address_start = -1, address_end = -1;
 
     if (argc > 3) { address_start = strtol(argv[3], NULL, 0); }
     if (argc > 4) { address_end = strtol(argv[4], NULL, 0); }
