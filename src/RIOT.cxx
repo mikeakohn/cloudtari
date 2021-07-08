@@ -14,18 +14,18 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "PIA.h"
+#include "RIOT.h"
 
-PIA::PIA()
+RIOT::RIOT()
 {
   reset();
 }
 
-PIA::~PIA()
+RIOT::~RIOT()
 {
 }
 
-void PIA::reset()
+void RIOT::reset()
 {
   memset(ram, 0, sizeof(ram));
   memset(riot, 0, sizeof(riot));
@@ -38,7 +38,7 @@ void PIA::reset()
   prescale_shift = TIM1T_SHIFT;
 }
 
-uint8_t PIA::read_memory(int address)
+uint8_t RIOT::read_memory(int address)
 {
   if (address >= 128 && address <= 255)
   {
@@ -55,7 +55,7 @@ uint8_t PIA::read_memory(int address)
   return riot[address & 0x07];
 }
 
-void PIA::write_memory(int address, uint8_t value)
+void RIOT::write_memory(int address, uint8_t value)
 {
   // 128 bytes of RAM.
   if (address >= 128 && address <= 255)
@@ -104,7 +104,7 @@ void PIA::write_memory(int address, uint8_t value)
   return;
 }
 
-void PIA::clock(int ticks)
+void RIOT::clock(int ticks)
 {
   while (ticks > 0)
   {

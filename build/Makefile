@@ -14,7 +14,7 @@ OBJECTS= \
   M6502.o \
   MemoryBus.o \
   Network.o \
-  PIA.o \
+  RIOT.o \
   ROM.o \
   TIA.o \
   Television.o \

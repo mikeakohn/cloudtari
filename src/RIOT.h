@@ -9,16 +9,16 @@
  *
  */
 
-#ifndef PIA_H
-#define PIA_H
+#ifndef RIOT_H
+#define RIOT_H
 
 #include <stdint.h>
 
-class PIA
+class RIOT
 {
 public:
-  PIA();
-  ~PIA();
+  RIOT();
+  ~RIOT();
 
   void reset();
   uint8_t read_memory(int address);

@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  PIA *pia = memory_bus->get_pia();
+  RIOT *riot = memory_bus->get_riot();
   TIA *tia = memory_bus->get_tia();
   tia->set_television(television);
 
@@ -190,40 +190,40 @@ int main(int argc, char *argv[])
     switch (event_code)
     {
       case Television::KEY_SELECT_DOWN:
-        pia->set_switch_select();
+        riot->set_switch_select();
         break;
       case Television::KEY_SELECT_UP:
-        pia->clear_switch_select();
+        riot->clear_switch_select();
         break;
       case Television::KEY_RESET_DOWN:
-        pia->set_switch_reset();
+        riot->set_switch_reset();
         break;
       case Television::KEY_RESET_UP:
-        pia->clear_switch_reset();
+        riot->clear_switch_reset();
         break;
       case Television::KEY_LEFT_DOWN:
-        pia->set_joystick_0_left();
+        riot->set_joystick_0_left();
         break;
       case Television::KEY_LEFT_UP:
-        pia->clear_joystick_0_left();
+        riot->clear_joystick_0_left();
         break;
       case Television::KEY_RIGHT_DOWN:
-        pia->set_joystick_0_right();
+        riot->set_joystick_0_right();
         break;
       case Television::KEY_RIGHT_UP:
-        pia->clear_joystick_0_right();
+        riot->clear_joystick_0_right();
         break;
       case Television::KEY_UP_DOWN:
-        pia->set_joystick_0_up();
+        riot->set_joystick_0_up();
         break;
       case Television::KEY_UP_UP:
-        pia->clear_joystick_0_up();
+        riot->clear_joystick_0_up();
         break;
       case Television::KEY_DOWN_DOWN:
-        pia->set_joystick_0_down();
+        riot->set_joystick_0_down();
         break;
       case Television::KEY_DOWN_UP:
-        pia->clear_joystick_0_down();
+        riot->clear_joystick_0_down();
         break;
       case Television::KEY_FIRE_DOWN:
         tia->set_joystick_0_fire();

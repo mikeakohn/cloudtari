@@ -12,7 +12,7 @@
 #ifndef MEMORY_BUS_H
 #define MEMORY_BUS_H
 
-#include "PIA.h"
+#include "RIOT.h"
 #include "ROM.h"
 #include "TIA.h"
 
@@ -28,7 +28,7 @@ public:
   void write(int address, uint8_t value);
   void dump(int start, int end);
   void clock(int cycles);
-  PIA *get_pia() { return pia; }
+  RIOT *get_riot() { return riot; }
   TIA *get_tia() { return tia; }
 
   uint16_t read16(int address)
@@ -38,7 +38,7 @@ public:
 
 private:
   ROM *rom;
-  PIA *pia;
+  RIOT *riot;
   TIA *tia;
 };
 

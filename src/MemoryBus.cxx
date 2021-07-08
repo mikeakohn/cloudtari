@@ -13,19 +13,19 @@
 #include <stdlib.h>
 
 #include "MemoryBus.h"
-#include "PIA.h"
+#include "RIOT.h"
 #include "TIA.h"
 
 MemoryBus::MemoryBus() : rom{nullptr}
 {
   tia = new TIA();
-  pia = new PIA();
+  riot = new RIOT();
 }
 
 MemoryBus::~MemoryBus()
 {
   delete tia;
-  delete pia;
+  delete riot;
 }
 
 void MemoryBus::init()
@@ -56,7 +56,7 @@ uint8_t MemoryBus::read(int address)
     return tia->read_memory(address & 0x3f);
   }
 
-  return pia->read_memory(address);
+  return riot->read_memory(address);
 }
 
 void MemoryBus::write(int address, uint8_t value)
@@ -72,7 +72,7 @@ void MemoryBus::write(int address, uint8_t value)
     else
   if ((address & 0x1000) == 0x0000)
   { 
-    pia->write_memory(address, value);
+    riot->write_memory(address, value);
   }
 }
 
@@ -106,6 +106,6 @@ void MemoryBus::dump(int start, int end)
 void MemoryBus::clock(int cycles)
 {
   tia->clock(cycles);
-  pia->clock(cycles);
+  riot->clock(cycles);
 }
 
