@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
       }
     }
 
-    if (tia->need_check_events() == 0)
+    if (tia->need_check_events())
     {
       int event_code = television->handle_events();
 
