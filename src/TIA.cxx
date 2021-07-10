@@ -290,6 +290,13 @@ void TIA::clock()
     // The point to the first bit to be displayed from PF0, PF1, PF2.
     if (pos_x == 68) { playfield.reset(); }
 
+    playfield.compute_pixel(pos_x);
+    player_0.compute_pixel(pos_x);
+    player_1.compute_pixel(pos_x);
+    missile_0.compute_pixel(pos_x);
+    missile_1.compute_pixel(pos_x);
+    ball.compute_pixel(pos_x);
+
     draw_pixel();
     compute_collisions();
   }
@@ -328,11 +335,11 @@ void TIA::clock(int ticks)
 
   // For some reason (according to some forum) the TIA delays setting the
   // X position for player sprites by 5 TIA clocks and ball / missile by 4.
-  if (player_0.need_set_position()) { player_0.set_position(pos_x + 5); }
-  if (player_1.need_set_position()) { player_1.set_position(pos_x + 5); }
+  if (player_0.need_set_position())  { player_0.set_position(pos_x + 5); }
+  if (player_1.need_set_position())  { player_1.set_position(pos_x + 5); }
   if (missile_0.need_set_position()) { missile_0.set_position(pos_x + 4); }
   if (missile_1.need_set_position()) { missile_1.set_position(pos_x + 4); }
-  if (ball.need_set_position()) { ball.set_position(pos_x + 4); }
+  if (ball.need_set_position())      { ball.set_position(pos_x + 4); }
 
   if (hsync_latch)
   {
@@ -470,12 +477,12 @@ void TIA::draw_pixel()
     // Sprites have priority.
     do
     {
-      if (player_0.is_pixel_on(pos_x))  { color = colors.player_0;  break; }
-      if (missile_0.is_pixel_on(pos_x)) { color = colors.player_0;  break; }
-      if (player_1.is_pixel_on(pos_x))  { color = colors.player_1;  break; }
-      if (missile_1.is_pixel_on(pos_x)) { color = colors.player_1;  break; }
-      if (playfield.is_pixel_on(pos_x)) { color = colors.playfield; break; }
-      if (ball.is_pixel_on(pos_x))      { color = colors.playfield; break; }
+      if (player_0.is_pixel_on())  { color = colors.player_0;  break; }
+      if (missile_0.is_pixel_on()) { color = colors.player_0;  break; }
+      if (player_1.is_pixel_on())  { color = colors.player_1;  break; }
+      if (missile_1.is_pixel_on()) { color = colors.player_1;  break; }
+      if (playfield.is_pixel_on()) { color = colors.playfield; break; }
+      if (ball.is_pixel_on())      { color = colors.playfield; break; }
     } while (false);
   }
     else
@@ -483,12 +490,12 @@ void TIA::draw_pixel()
     // Playfield has priority.
     do
     {
-      if (playfield.is_pixel_on(pos_x)) { color = colors.playfield; break; }
-      if (ball.is_pixel_on(pos_x))      { color = colors.playfield; break; }
-      if (player_0.is_pixel_on(pos_x))  { color = colors.player_0;  break; }
-      if (missile_0.is_pixel_on(pos_x)) { color = colors.player_0;  break; }
-      if (player_1.is_pixel_on(pos_x))  { color = colors.player_1;  break; }
-      if (missile_1.is_pixel_on(pos_x)) { color = colors.player_1;  break; }
+      if (playfield.is_pixel_on()) { color = colors.playfield; break; }
+      if (ball.is_pixel_on())      { color = colors.playfield; break; }
+      if (player_0.is_pixel_on())  { color = colors.player_0;  break; }
+      if (missile_0.is_pixel_on()) { color = colors.player_0;  break; }
+      if (player_1.is_pixel_on())  { color = colors.player_1;  break; }
+      if (missile_1.is_pixel_on()) { color = colors.player_1;  break; }
     } while (false);
   }
 
@@ -497,12 +504,12 @@ void TIA::draw_pixel()
 
 void TIA::compute_collisions()
 {
-  const int m0 = missile_0.is_pixel_on(pos_x);
-  const int m1 = missile_1.is_pixel_on(pos_x);
-  const int p0 = player_0.is_pixel_on(pos_x);
-  const int p1 = player_1.is_pixel_on(pos_x);
-  const int bl = ball.is_pixel_on(pos_x);
-  const int pf = playfield.is_pixel_on(pos_x);
+  const int m0 = missile_0.is_pixel_on();
+  const int m1 = missile_1.is_pixel_on();
+  const int p0 = player_0.is_pixel_on();
+  const int p1 = player_1.is_pixel_on();
+  const int bl = ball.is_pixel_on();
+  const int pf = playfield.is_pixel_on();
 
   read_regs[CXM0P] |= ((m0 & p1) << 7) | ((m0 & p0) << 6);
   read_regs[CXM1P] |= ((m1 & p0) << 7) | ((m1 & p1) << 6);

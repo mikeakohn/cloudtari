@@ -65,18 +65,21 @@ private:
   {
     Playfield() : data{0}, current_pixel{1} { }
     void reset() { current_pixel = 1; }
-    bool is_pixel_on() { return (data & current_pixel) != 0; }
+    bool is_pixel_on() { return pixel_value; }
 
-    bool is_pixel_on(int pos_x)
+    //bool compute_pixel() { pixel_value = (data & current_pixel) != 0; }
+
+    void compute_pixel(int pos_x)
     {
       //if (pos_x < 68) { return false; }
       pos_x = (pos_x - 68) / 4;
 
-      return (data & (1ULL << pos_x)) != 0;
+      pixel_value = (data & (1ULL << pos_x)) != 0;
     }
 
     void next_pixel() { current_pixel <<= 1; }
 
+    bool pixel_value;
     uint64_t data;
     uint64_t current_pixel;
   };
@@ -103,20 +106,22 @@ private:
     void apply_offset() { offset = next_offset; }
     void clear_offset() { offset = 0; next_offset = 0; }
     bool need_set_position() { return set_pos; }
+    bool is_pixel_on() { return pixel_value; }
 
-    bool is_pixel_on(int pos_x)
+    void compute_pixel(int pos_x)
     {
       //if (pos_x < 68) { return false; }
-      if (pos_x < start_pos - offset) { return false; }
+      if (pos_x < start_pos - offset) { pixel_value = false; return; }
       int x = (pos_x - (start_pos - offset)) / scale;
-      if (x > 7) { return false; }
-      return (data & (1 << x)) != 0;
+      if (x > 7) { pixel_value = false; return; }
+      pixel_value = (data & (1 << x)) != 0;
     }
 
     uint8_t data;
     bool set_pos;
     bool vertical_delay;
     bool need_update;
+    bool pixel_value;
     int scale, start_pos, offset, next_offset;
   };
 
@@ -140,18 +145,20 @@ private:
     void clear_offset() { offset = 0; next_offset = 0; }
     void set_enabled(bool value) { enabled = value; }
     bool need_set_position() { return set_pos; }
+    bool is_pixel_on() { return pixel_value; }
 
-    bool is_pixel_on(int pos_x)
+    void compute_pixel(int pos_x)
     {
-      if (!enabled) { return false; }
+      if (!enabled) { pixel_value = false; return; }
       //if (pos_x < 68) { return false; }
       int x = start_pos - offset;
-      return pos_x >= x && pos_x < x + width;
+      pixel_value = pos_x >= x && pos_x < x + width;
     }
 
     uint8_t width;
     bool set_pos;
     bool enabled;
+    bool pixel_value;
     int start_pos, offset, next_offset;
   };
 
