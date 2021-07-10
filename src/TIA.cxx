@@ -120,6 +120,7 @@ count = 0;
       player_size(player_1, value);
       missile_1.set_width(1 << ((value >> 4) & 0x3));
       break;
+#if 0
     case COLUP0:
       colors.player_0 = value;
       break;
@@ -132,6 +133,7 @@ count = 0;
     case COLUPF:
       colors.playfield = value;
       break;
+#endif
     case CTRLPF:
       write_regs[CTRLPF] = value;
       ball.set_width(1 << ((value >> 4) & 0x3));
@@ -470,19 +472,19 @@ void TIA::build_player_1()
 
 void TIA::draw_pixel()
 {
-  uint8_t color = colors.background;
+  uint8_t color = write_regs[COLUBK];
 
   if ((write_regs[CTRLPF] & 4) == 0)
   {
     // Sprites have priority.
     do
     {
-      if (player_0.is_pixel_on())  { color = colors.player_0;  break; }
-      if (missile_0.is_pixel_on()) { color = colors.player_0;  break; }
-      if (player_1.is_pixel_on())  { color = colors.player_1;  break; }
-      if (missile_1.is_pixel_on()) { color = colors.player_1;  break; }
-      if (playfield.is_pixel_on()) { color = colors.playfield; break; }
-      if (ball.is_pixel_on())      { color = colors.playfield; break; }
+      if (player_0.is_pixel_on())  { color = write_regs[COLUP0]; break; }
+      if (missile_0.is_pixel_on()) { color = write_regs[COLUP0]; break; }
+      if (player_1.is_pixel_on())  { color = write_regs[COLUP1]; break; }
+      if (missile_1.is_pixel_on()) { color = write_regs[COLUP1]; break; }
+      if (playfield.is_pixel_on()) { color = write_regs[COLUPF]; break; }
+      if (ball.is_pixel_on())      { color = write_regs[COLUPF]; break; }
     } while (false);
   }
     else
@@ -490,12 +492,12 @@ void TIA::draw_pixel()
     // Playfield has priority.
     do
     {
-      if (playfield.is_pixel_on()) { color = colors.playfield; break; }
-      if (ball.is_pixel_on())      { color = colors.playfield; break; }
-      if (player_0.is_pixel_on())  { color = colors.player_0;  break; }
-      if (missile_0.is_pixel_on()) { color = colors.player_0;  break; }
-      if (player_1.is_pixel_on())  { color = colors.player_1;  break; }
-      if (missile_1.is_pixel_on()) { color = colors.player_1;  break; }
+      if (playfield.is_pixel_on()) { color = write_regs[COLUPF]; break; }
+      if (ball.is_pixel_on())      { color = write_regs[COLUPF]; break; }
+      if (player_0.is_pixel_on())  { color = write_regs[COLUP0]; break; }
+      if (missile_0.is_pixel_on()) { color = write_regs[COLUP0]; break; }
+      if (player_1.is_pixel_on())  { color = write_regs[COLUP1]; break; }
+      if (missile_1.is_pixel_on()) { color = write_regs[COLUP1]; break; }
     } while (false);
   }
 

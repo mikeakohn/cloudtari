@@ -214,6 +214,7 @@ private:
     }
   }
 
+#if 0
   struct Colors
   {
     uint8_t playfield;
@@ -221,6 +222,7 @@ private:
     uint8_t player_0;
     uint8_t player_1;
   } colors;
+#endif
 
   Television *television;
 
