@@ -35,6 +35,13 @@ public:
   void clear_joystick_0_fire() { read_regs[INPT4] |= 0x80; }
   void clear_joystick_1_fire() { read_regs[INPT5] |= 0x80; }
 
+  bool need_check_events()
+  {
+    bool value = check_events;
+    check_events = false;
+    return value;
+  }
+
   void set_image()
   {
     if (bitsize == 8)
@@ -244,6 +251,7 @@ private:
   uint32_t *image_32;
   uint8_t *image_8;
   int bitsize;
+  bool check_events;
 
   enum WriteAddress
   {

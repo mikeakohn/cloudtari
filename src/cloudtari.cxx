@@ -127,8 +127,14 @@ int main(int argc, char *argv[])
     if (argc > 3) { step_address = strtol(argv[3], NULL, 0); }
   }
     else
+  if (strcmp(argv[2], "null") == 0)
   {
     television = new TelevisionNull();
+  }
+    else
+  {
+    printf("Unknown mode %s\n", argv[1]);
+    exit(1);
   }
 
   if (television->init() != 0)
@@ -183,54 +189,57 @@ int main(int argc, char *argv[])
       }
     }
 
-    int event_code = television->handle_events();
-
-    if (event_code == Television::KEY_QUIT) { break; }
-
-    switch (event_code)
+    if (tia->need_check_events() == 0)
     {
-      case Television::KEY_SELECT_DOWN:
-        riot->set_switch_select();
-        break;
-      case Television::KEY_SELECT_UP:
-        riot->clear_switch_select();
-        break;
-      case Television::KEY_RESET_DOWN:
-        riot->set_switch_reset();
-        break;
-      case Television::KEY_RESET_UP:
-        riot->clear_switch_reset();
-        break;
-      case Television::KEY_LEFT_DOWN:
-        riot->set_joystick_0_left();
-        break;
-      case Television::KEY_LEFT_UP:
-        riot->clear_joystick_0_left();
-        break;
-      case Television::KEY_RIGHT_DOWN:
-        riot->set_joystick_0_right();
-        break;
-      case Television::KEY_RIGHT_UP:
-        riot->clear_joystick_0_right();
-        break;
-      case Television::KEY_UP_DOWN:
-        riot->set_joystick_0_up();
-        break;
-      case Television::KEY_UP_UP:
-        riot->clear_joystick_0_up();
-        break;
-      case Television::KEY_DOWN_DOWN:
-        riot->set_joystick_0_down();
-        break;
-      case Television::KEY_DOWN_UP:
-        riot->clear_joystick_0_down();
-        break;
-      case Television::KEY_FIRE_DOWN:
-        tia->set_joystick_0_fire();
-        break;
-      case Television::KEY_FIRE_UP:
-        tia->clear_joystick_0_fire();
-        break;
+      int event_code = television->handle_events();
+
+      if (event_code == Television::KEY_QUIT) { break; }
+
+      switch (event_code)
+      {
+        case Television::KEY_SELECT_DOWN:
+          riot->set_switch_select();
+          break;
+        case Television::KEY_SELECT_UP:
+          riot->clear_switch_select();
+          break;
+        case Television::KEY_RESET_DOWN:
+          riot->set_switch_reset();
+          break;
+        case Television::KEY_RESET_UP:
+          riot->clear_switch_reset();
+          break;
+        case Television::KEY_LEFT_DOWN:
+          riot->set_joystick_0_left();
+          break;
+        case Television::KEY_LEFT_UP:
+          riot->clear_joystick_0_left();
+          break;
+        case Television::KEY_RIGHT_DOWN:
+          riot->set_joystick_0_right();
+          break;
+        case Television::KEY_RIGHT_UP:
+          riot->clear_joystick_0_right();
+          break;
+        case Television::KEY_UP_DOWN:
+          riot->set_joystick_0_up();
+          break;
+        case Television::KEY_UP_UP:
+          riot->clear_joystick_0_up();
+          break;
+        case Television::KEY_DOWN_DOWN:
+          riot->set_joystick_0_down();
+          break;
+        case Television::KEY_DOWN_UP:
+          riot->clear_joystick_0_down();
+          break;
+        case Television::KEY_FIRE_DOWN:
+          tia->set_joystick_0_fire();
+          break;
+        case Television::KEY_FIRE_UP:
+          tia->clear_joystick_0_fire();
+          break;
+      }
     }
 
     if (step)

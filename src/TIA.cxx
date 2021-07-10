@@ -28,7 +28,8 @@ TIA::TIA() :
   pos_y{0},
   hsync_latch{false},
   image_32{nullptr},
-  image_8{nullptr}
+  image_8{nullptr},
+  check_events{false}
 {
   for (int n = 0; n < 256; n++)
   {
@@ -318,6 +319,8 @@ void TIA::clock()
       television->refresh();
     }
 #endif
+
+    if (pos_y < 40) { check_events = true; }
 
     pos_x = 0;
     pos_y++;
