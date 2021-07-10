@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 
+#include "ColorTable.h"
 #include "Television.h"
 
 class TIA
@@ -23,7 +24,6 @@ public:
   ~TIA();
 
   void reset();
-  void set_television(Television *television) { this->television = television; }
   uint8_t read_memory(int address);
   void write_memory(int address, uint8_t value);
   void clock();
@@ -34,6 +34,25 @@ public:
   void set_joystick_1_fire() { read_regs[INPT5] &= 0x7f; }
   void clear_joystick_0_fire() { read_regs[INPT4] |= 0x80; }
   void clear_joystick_1_fire() { read_regs[INPT5] |= 0x80; }
+
+  void set_image()
+  {
+    if (bitsize == 8)
+    {
+      image_8 = (uint8_t *)television->get_image();
+    }
+      else
+    {
+      image_32 = (uint32_t *)television->get_image();
+    }
+  }
+
+  void set_television(Television *television)
+  {
+    this->television = television;
+    bitsize = television->get_bitsize();
+    set_image();
+  }
 
   int compute_offset(int value)
   {
@@ -50,7 +69,7 @@ private:
 
     bool is_pixel_on(int pos_x)
     {
-      if (pos_x < 68) { return false; }
+      //if (pos_x < 68) { return false; }
       pos_x = (pos_x - 68) / 4;
 
       return (data & (1ULL << pos_x)) != 0;
@@ -87,12 +106,10 @@ private:
 
     bool is_pixel_on(int pos_x)
     {
-      if (pos_x < 68) { return false; }
+      //if (pos_x < 68) { return false; }
       if (pos_x < start_pos - offset) { return false; }
       int x = (pos_x - (start_pos - offset)) / scale;
       if (x > 7) { return false; }
-//if (x == 0) { printf("pos_x=%d offset=%d start_pos=%d %d\n",
-//  pos_x, offset, start_pos, start_pos - offset); }
       return (data & (1 << x)) != 0;
     }
 
@@ -127,7 +144,7 @@ private:
     bool is_pixel_on(int pos_x)
     {
       if (!enabled) { return false; }
-      if (pos_x < 68) { return false; }
+      //if (pos_x < 68) { return false; }
       int x = start_pos - offset;
       return pos_x >= x && pos_x < x + width;
     }
@@ -155,15 +172,40 @@ private:
   void build_playfield();
   void build_player_0();
   void build_player_1();
-  bool draw_playfield_fg();
-  bool draw_player_0();
-  bool draw_player_1();
-  bool draw_missile_0();
-  bool draw_missile_1();
-  bool draw_ball();
-  void draw_playfield_bg();
   void draw_pixel();
   void compute_collisions();
+
+  inline void set_pixel(int x, int y, uint8_t color)
+  {
+    x = x * 3;
+    y = y * 2;
+
+    const int width = television->get_width();
+    int ptr = y * width + x;
+
+    if (bitsize == 8)
+    {
+      color = color >> 1;
+      image_8[ptr + 0] = color;
+      image_8[ptr + 1] = color;
+      image_8[ptr + 2] = color;
+      ptr += width;
+      image_8[ptr + 0] = color;
+      image_8[ptr + 1] = color;
+      image_8[ptr + 2] = color;
+    }
+      else
+    {
+      int c = ColorTable::get_color(color);
+      image_32[ptr + 0] = c;
+      image_32[ptr + 1] = c;
+      image_32[ptr + 2] = c;
+      ptr += width;
+      image_32[ptr + 0] = c;
+      image_32[ptr + 1] = c;
+      image_32[ptr + 2] = c;
+    }
+  }
 
   struct Colors
   {
@@ -189,6 +231,10 @@ private:
   uint8_t write_regs[64];
   uint8_t read_regs[16];
   uint8_t reverse[256];
+
+  uint32_t *image_32;
+  uint8_t *image_8;
+  int bitsize;
 
   enum WriteAddress
   {

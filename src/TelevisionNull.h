@@ -23,13 +23,16 @@ public:
   virtual ~TelevisionNull();
 
   virtual int init();
-  virtual void clear_display();
-  virtual void draw_pixel(int x, int y, uint32_t color);
-  virtual void draw_pixel(int x, int y, uint8_t color);
+  //virtual void clear_display();
+  //virtual void draw_pixel(int x, int y, uint32_t color);
+  //virtual void draw_pixel(int x, int y, uint8_t color);
   virtual bool refresh();
+  virtual void *get_image() { return image; }
+  virtual int get_bitsize() { return 32; }
   virtual int handle_events();
 
 private:
+  uint32_t *image;
 
 };
 

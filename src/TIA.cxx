@@ -12,8 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
-//#include "ColorTable.h"
+#include "ColorTable.h"
 #include "TIA.h"
 
 // Atari 2600 has:
@@ -22,7 +23,12 @@
 // Total Resolution: 228x262
 // Visible Resolution: 160x192
 
-TIA::TIA() : pos_x{0}, pos_y{0}, hsync_latch{false}
+TIA::TIA() :
+  pos_x{0},
+  pos_y{0},
+  hsync_latch{false},
+  image_32{nullptr},
+  image_8{nullptr}
 {
   for (int n = 0; n < 256; n++)
   {
@@ -71,9 +77,26 @@ void TIA::write_memory(int address, uint8_t value)
     case VSYNC:
       if ((value & 2) == 2)
       {
+#if 0
+static int count = 0;
+static time_t timestamp = 0;
+time_t now = time(NULL);
+count++;
+
+if (now != timestamp)
+{
+timestamp = now;
+printf("frames/second=%d\n", count);
+count = 0;
+}
+#endif
+
         television->refresh();
         pos_x = 0;
         pos_y = 0;
+
+        // In case the Television is page flipping.
+        set_image();
       }
 
       write_regs[VSYNC] = value;
@@ -280,6 +303,13 @@ void TIA::clock()
 
     if (!hsync_latch) { write_regs[WSYNC] = 0; }
 
+#if 0
+    if (pos_y >= 40 && pos_y <= 232)
+    {
+      television->refresh();
+    }
+#endif
+
     pos_x = 0;
     pos_y++;
   }
@@ -431,107 +461,38 @@ void TIA::build_player_1()
   player_1.need_update = false;
 }
 
-bool TIA::draw_playfield_fg()
-{
-  if (playfield.is_pixel_on(pos_x))
-  {
-    television->draw_pixel(get_x(), get_y(), colors.playfield);
-
-    return true;
-  }
-
-  return false;
-}
-
-bool TIA::draw_player_0()
-{
-  if (player_0.is_pixel_on(pos_x))
-  {
-    television->draw_pixel(get_x(), get_y(), colors.player_0);
-
-    return true;
-  }
-
-  return false;
-}
-
-bool TIA::draw_player_1()
-{
-  if (player_1.is_pixel_on(pos_x))
-  {
-    television->draw_pixel(get_x(), get_y(), colors.player_1);
-
-    return true;
-  }
-
-  return false;
-}
-
-bool TIA::draw_missile_0()
-{
-  if (missile_0.is_pixel_on(pos_x))
-  {
-    television->draw_pixel(get_x(), get_y(), colors.player_0);
-
-    return true;
-  }
-
-  return false;
-}
-
-bool TIA::draw_missile_1()
-{
-  if (missile_1.is_pixel_on(pos_x))
-  {
-    television->draw_pixel(get_x(), get_y(), colors.player_1);
-
-    return true;
-  }
-
-  return false;
-}
-
-bool TIA::draw_ball()
-{
-  if (ball.is_pixel_on(pos_x))
-  {
-    television->draw_pixel(get_x(), get_y(), colors.playfield);
-
-    return true;
-  }
-
-  return false;
-}
-
-void TIA::draw_playfield_bg()
-{
-  television->draw_pixel(get_x(), get_y(), colors.background);
-}
-
 void TIA::draw_pixel()
 {
+  uint8_t color = colors.background;
+
   if ((write_regs[CTRLPF] & 4) == 0)
   {
     // Sprites have priority.
-    if (draw_player_0()) { return; }
-    if (draw_missile_0()) { return; }
-    if (draw_player_1()) { return; }
-    if (draw_missile_1()) { return; }
-    if (draw_playfield_fg()) { return; }
-    if (draw_ball()) { return; }
+    do
+    {
+      if (player_0.is_pixel_on(pos_x))  { color = colors.player_0;  break; }
+      if (missile_0.is_pixel_on(pos_x)) { color = colors.player_0;  break; }
+      if (player_1.is_pixel_on(pos_x))  { color = colors.player_1;  break; }
+      if (missile_1.is_pixel_on(pos_x)) { color = colors.player_1;  break; }
+      if (playfield.is_pixel_on(pos_x)) { color = colors.playfield; break; }
+      if (ball.is_pixel_on(pos_x))      { color = colors.playfield; break; }
+    } while (false);
   }
     else
   {
     // Playfield has priority.
-    if (draw_playfield_fg()) { return; }
-    if (draw_ball()) { return; }
-    if (draw_player_0()) { return; }
-    if (draw_missile_0()) { return; }
-    if (draw_player_1()) { return; }
-    if (draw_missile_1()) { return; }
+    do
+    {
+      if (playfield.is_pixel_on(pos_x)) { color = colors.playfield; break; }
+      if (ball.is_pixel_on(pos_x))      { color = colors.playfield; break; }
+      if (player_0.is_pixel_on(pos_x))  { color = colors.player_0;  break; }
+      if (missile_0.is_pixel_on(pos_x)) { color = colors.player_0;  break; }
+      if (player_1.is_pixel_on(pos_x))  { color = colors.player_1;  break; }
+      if (missile_1.is_pixel_on(pos_x)) { color = colors.player_1;  break; }
+    } while (false);
   }
 
-  draw_playfield_bg();
+  set_pixel(get_x(), get_y(), color);
 }
 
 void TIA::compute_collisions()

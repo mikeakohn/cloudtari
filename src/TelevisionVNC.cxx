@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <arpa/inet.h>
 
 #include "ColorTable.h"
@@ -42,8 +42,6 @@ TelevisionVNC::TelevisionVNC() :
 
   diff_buffer_length = width * height * 4;
   diff_buffer = (uint8_t *)malloc(diff_buffer_length);
-
-  memset(&refresh_time, 0, sizeof(refresh_time));
 }
 
 TelevisionVNC::~TelevisionVNC()
@@ -67,6 +65,7 @@ int TelevisionVNC::init()
   return 0;
 }
 
+#if 0
 void TelevisionVNC::clear_display()
 {
   const int length = width * height * 4;
@@ -83,22 +82,11 @@ void TelevisionVNC::draw_pixel(int x, int y, uint8_t color)
 {
   set_pixel(x, y, ColorTable::get_color(color));
 }
+#endif
 
 bool TelevisionVNC::refresh()
 {
-  struct timeval now;
-
-  gettimeofday(&now, NULL);
-  long time_diff = now.tv_usec - refresh_time.tv_usec;
-  while(time_diff < 0) { now.tv_sec--; time_diff += 1000000; }
-  time_diff += (now.tv_sec - refresh_time.tv_sec) * 1000000;
-
-  if (time_diff < 16000)
-  {
-    usleep(16000 - time_diff);
-  }
-
-  refresh_time = now;
+  pause();
 
   send_image_diff();
 

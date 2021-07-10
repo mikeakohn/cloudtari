@@ -9,10 +9,15 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "Television.h"
 
 Television::Television() : width{480}, height{384}
 {
+  memset(&refresh_time, 0, sizeof(refresh_time));
 }
 
 Television::~Television()

@@ -13,6 +13,8 @@
 #define TELEVISION_H
 
 #include <stdint.h>
+#include <unistd.h>
+#include <sys/time.h>
 
 class Television
 {
@@ -21,12 +23,33 @@ public:
   virtual ~Television();
 
   virtual int init() = 0;
-  virtual void clear_display() = 0;
-  virtual void draw_pixel(int x, int y, uint32_t color) = 0;
-  virtual void draw_pixel(int x, int y, uint8_t color) = 0;
+  //virtual void clear_display() = 0;
+  //virtual void draw_pixel(int x, int y, uint32_t color) = 0;
+  //virtual void draw_pixel(int x, int y, uint8_t color) = 0;
   virtual bool refresh() = 0;
   virtual int handle_events() = 0;
-  virtual void set_port(int value) { };
+  virtual void *get_image() = 0;
+  virtual int get_bitsize() = 0;
+  virtual void set_port(int value) { }
+  int get_width() { return width; }
+  int get_height() { return height; }
+
+  void pause()
+  {
+    struct timeval now;
+
+    gettimeofday(&now, NULL);
+    long time_diff = now.tv_usec - refresh_time.tv_usec;
+    while(time_diff < 0) { now.tv_sec--; time_diff += 1000000; }
+    time_diff += (now.tv_sec - refresh_time.tv_sec) * 1000000;
+
+    if (time_diff < 16000)
+    {
+      usleep(16000 - time_diff);
+    }
+
+    refresh_time = now;
+  }
 
   enum
   {
@@ -49,6 +72,7 @@ public:
 
 protected:
   int width, height;
+  struct timeval refresh_time;
 
 private:
 

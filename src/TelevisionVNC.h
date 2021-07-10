@@ -13,7 +13,6 @@
 #define TELEVISION_VNC_H
 
 #include <stdint.h>
-#include <sys/time.h>
 
 #include "Network.h"
 #include "Television.h"
@@ -25,15 +24,17 @@ public:
   virtual ~TelevisionVNC();
 
   virtual int init();
-  virtual void clear_display();
-  virtual void draw_pixel(int x, int y, uint32_t color);
-  virtual void draw_pixel(int x, int y, uint8_t color);
+  //virtual void clear_display();
+  //virtual void draw_pixel(int x, int y, uint32_t color);
+  //virtual void draw_pixel(int x, int y, uint8_t color);
   virtual bool refresh();
   virtual int handle_events();
+  virtual void *get_image() { return image_packet[image_page]->data; }
+  virtual int get_bitsize() { return 32; }
   virtual void set_port(int value) { port = value; };
 
 private:
-  void set_pixel(int x, int y, uint32_t color);
+  inline void set_pixel(int x, int y, uint32_t color);
   int send_protocol_version();
   int get_client_protocol_version();
   int send_security();
@@ -49,7 +50,6 @@ private:
   bool needs_full_image;
   bool needs_color_table;
   int image_packet_length;
-  struct timeval refresh_time;
 
   struct ImagePacket
   {

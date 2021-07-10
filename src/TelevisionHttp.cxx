@@ -12,8 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/time.h>
 #include <string>
 
 #include "ColorTable.h"
@@ -27,7 +25,6 @@ TelevisionHttp::TelevisionHttp() : gif{nullptr}, gif_length{0}
 
   image = (uint8_t *)malloc(width * height);
 
-  memset(&refresh_time, 0, sizeof(refresh_time));
   memset(filename, 0, sizeof(filename));
   memset(query_string, 0, sizeof(query_string));
 }
@@ -49,6 +46,7 @@ int TelevisionHttp::init()
   return 0;
 }
 
+#if 0
 void TelevisionHttp::clear_display()
 {
   memset(image, 0, width * height);
@@ -57,8 +55,6 @@ void TelevisionHttp::clear_display()
 void TelevisionHttp::draw_pixel(int x, int y, uint32_t color)
 {
   printf("Internal error: draw_pixel(int x, int y, uint32_t color) not implemented\n");
-
-  exit(1);
 }
 
 void TelevisionHttp::draw_pixel(int x, int y, uint8_t color)
@@ -84,6 +80,7 @@ void TelevisionHttp::draw_pixel(int x, int y, uint8_t color)
     image[pixel + width + 2] = color;
   }
 }
+#endif
 
 bool TelevisionHttp::refresh()
 {
@@ -92,19 +89,7 @@ bool TelevisionHttp::refresh()
   gif = gif_compressor->get_gif_data();
   gif_length = gif_compressor->get_gif_length();
 
-  struct timeval now;
-
-  gettimeofday(&now, NULL);
-  long time_diff = now.tv_usec - refresh_time.tv_usec;
-  while(time_diff < 0) { now.tv_sec--; time_diff += 1000000; }
-  time_diff += (now.tv_sec - refresh_time.tv_sec) * 1000000;
-
-  if (time_diff < 16000)
-  {
-    usleep(16000 - time_diff);
-  }
-
-  refresh_time = now;
+  pause();
 
   return true;
 }

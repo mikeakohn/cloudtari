@@ -26,11 +26,13 @@ public:
   virtual ~TelevisionHttp();
 
   virtual int init();
-  virtual void clear_display();
-  virtual void draw_pixel(int x, int y, uint32_t color);
-  virtual void draw_pixel(int x, int y, uint8_t color);
+  //virtual void clear_display();
+  //virtual void draw_pixel(int x, int y, uint32_t color);
+  //virtual void draw_pixel(int x, int y, uint8_t color);
   virtual bool refresh();
   virtual int handle_events();
+  virtual void *get_image() { return image; }
+  virtual int get_bitsize() { return 8; }
   virtual void set_port(int value) { port = value; };
 
 private:
@@ -45,8 +47,6 @@ private:
   GifCompressor *gif_compressor;
   char query_string[128];
   char filename[128];
-
-  struct timeval refresh_time;
 
   struct KeyQueue
   {

@@ -9,6 +9,9 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "ColorTable.h"
 #include "TelevisionSDL.h"
 
@@ -29,18 +32,20 @@ TelevisionSDL::TelevisionSDL()
   background_rect.w = width;
   background_rect.h = height;
 
-  //renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+  // NOTE: It's possible to write directly to the surface, but requires
+  // SDL_LockSurface() so it seems this might be a little simpler for now.
+  image = (uint32_t *)malloc(width * height * 4);
 
   //SDL_RenderClear(renderer);
   screen = SDL_GetWindowSurface(window);
 
   background_color = SDL_MapRGB(screen->format, 50, 50, 100);
-
-  clear_display();
 }
 
 TelevisionSDL::~TelevisionSDL()
 {
+  free(image);
+
   if (screen != NULL) { SDL_FreeSurface(screen); }
   if (window != NULL) { SDL_DestroyWindow(window); }
 
@@ -52,6 +57,7 @@ int TelevisionSDL::init()
   return 0;
 }
 
+#if 0
 void TelevisionSDL::clear_display()
 {
   //SDL_RenderClear(renderer);
@@ -82,9 +88,25 @@ void TelevisionSDL::draw_pixel(int x, int y, uint8_t color)
 
   SDL_FillRect(screen, &rect, ColorTable::get_color(color));
 }
+#endif
 
 bool TelevisionSDL::refresh()
 {
+  pause();
+
+#if 0
+  SDL_Rect rect;
+  rect.x = 0;
+  rect.y = 0;
+  rect.w = width;
+  rect.h = height;
+#endif
+
+  // Copy the drawn image to the screen.
+  SDL_LockSurface(screen);
+  memcpy(screen->pixels, image, width * height * 4);
+  SDL_UnlockSurface(screen);
+
   SDL_UpdateWindowSurface(window);
 
   return true;
