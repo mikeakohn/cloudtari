@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <time.h>
 
 class Television
 {
@@ -40,12 +41,25 @@ public:
 
     gettimeofday(&now, NULL);
     long time_diff = now.tv_usec - refresh_time.tv_usec;
-    while(time_diff < 0) { now.tv_sec--; time_diff += 1000000; }
+    while (time_diff < 0) { now.tv_sec--; time_diff += 1000000; }
     time_diff += (now.tv_sec - refresh_time.tv_sec) * 1000000;
 
-    if (time_diff < 16000)
+#if 0
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    long time_diff = now.tv_nsec - refresh_time.tv_nsec;
+    while (time_diff < 0) { now.tv_sec--; time_diff += 1000000000; }
+    time_diff += (now.tv_sec - refresh_time.tv_sec) * 1000000000;
+    time_diff = time_diff / 1000;
+#endif
+
+    // 1,000,000 us / 60 fps = 16667
+    // 1,000,000 us / 30 fps = 33333
+    // FIXME: The TV should be 60fps, but for some reason 33333
+    // is coming out at 60fps in the TIA.
+    if (time_diff < 33333)
     {
-      usleep(16000 - time_diff);
+      usleep(33333 - time_diff);
     }
 
     refresh_time = now;
