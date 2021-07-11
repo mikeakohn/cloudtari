@@ -89,7 +89,7 @@ int M6502::execute_instruction()
 
   if (debug)
   {
-    char text[16];
+    char text[64];
     uint8_t code[3];
     code[0] = memory_bus->read(address + 0);
     code[1] = memory_bus->read(address + 1);
