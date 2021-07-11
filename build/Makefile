@@ -2,6 +2,7 @@ C?=gcc
 CXX?=g++
 DEBUG=-DDEBUG -g
 INCLUDES=-I..
+#OPT=-mcpu=cortex-a72 -mtune=cortex-a72
 CFLAGS=-Wall -O3 -std=c++11 $(DEBUG) $(INCLUDES)
 #CFLAGS=-Wall $(DEBUG) $(INCLUDES)
 LDFLAGS=-lSDL2

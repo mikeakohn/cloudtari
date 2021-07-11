@@ -13,6 +13,7 @@
 #define TIA_H
 
 #include <stdint.h>
+#include <time.h>
 
 #include "ColorTable.h"
 #include "Television.h"
@@ -221,6 +222,20 @@ private:
     }
   }
 
+  // Debugging function.
+  inline void show_fps()
+  {
+    time_t now = time(NULL);
+    fps++;
+
+    if (now != timestamp)
+    {
+      timestamp = now;
+      printf("fps=%d\n", fps);
+      fps = 0;
+    }
+  }
+
 #if 0
   struct Colors
   {
@@ -252,6 +267,10 @@ private:
   uint8_t *image_8;
   int bitsize;
   bool check_events;
+
+  // These are for debugging frames per second.
+  int fps;
+  time_t timestamp;
 
   enum WriteAddress
   {

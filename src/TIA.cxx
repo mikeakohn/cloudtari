@@ -29,7 +29,9 @@ TIA::TIA() :
   hsync_latch{false},
   image_32{nullptr},
   image_8{nullptr},
-  check_events{false}
+  check_events{false},
+  fps{0},
+  timestamp{0}
 {
   for (int n = 0; n < 256; n++)
   {
@@ -78,19 +80,7 @@ void TIA::write_memory(int address, uint8_t value)
     case VSYNC:
       if ((value & 2) == 2)
       {
-#if 0
-static int count = 0;
-static time_t timestamp = 0;
-time_t now = time(NULL);
-count++;
-
-if (now != timestamp)
-{
-timestamp = now;
-printf("frames/second=%d\n", count);
-count = 0;
-}
-#endif
+        //show_fps();
 
         television->refresh();
         pos_x = 0;
@@ -324,6 +314,9 @@ void TIA::clock()
 
     pos_x = 0;
     pos_y++;
+
+    // This really shouldn't be needed.. but..
+    if (pos_y > 262) { pos_y = 0; }
   }
 }
 
