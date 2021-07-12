@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+ name: cloudtari
+spec:
+  template:
+    metadata:
+      name: cloudtari
+    spec:
+      containers:
+      - name: cloudtari
+        image: localhost:32000/cloudtari:local
+        imagePullPolicy: Never
+        command: ["/root/cloudtari", "/root/space_revenge.bin", "vnc", "5900"]
+      hostNetwork: true
+      restartPolicy: Never
+
