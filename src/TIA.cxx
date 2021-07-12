@@ -310,7 +310,7 @@ void TIA::clock()
     }
 #endif
 
-    if (pos_y < 40) { check_events = true; }
+    if (pos_y < 40 && (pos_y & 0xf) == 0) { check_events = true; }
 
     pos_x = 0;
     pos_y++;
