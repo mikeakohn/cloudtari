@@ -7,6 +7,10 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * For the debugger, this object is used to count CPU cycles from a
+ * start address until an end address. At a high level, this is used
+ * for the Cloutari "timer" command line option.
+ *
  */
 
 #ifndef DEBUG_TIMER_H

@@ -7,6 +7,10 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * TelevisionVNC can display the Atari 2600 video over a network using
+ * the VNC remote desktop protocol. Keyboard commands are transmitted
+ * back to the class also.
+ *
  */
 
 #ifndef TELEVISION_VNC_H

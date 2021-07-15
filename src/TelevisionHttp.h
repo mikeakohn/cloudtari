@@ -7,6 +7,13 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * TelevisionHttp implements a small web server that allows only one
+ * connection. When a request for / comes in the a web page with some
+ * simple Javascript will start requesting GIF images from this server
+ * 30 times a second. Keyboard presses are captured and put in a
+ * "queue" variable that are transmitted back to the server when new
+ * GIF images are requested.
+ *
  */
 
 #ifndef TELEVISION_HTTP_H

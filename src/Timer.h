@@ -7,6 +7,10 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * This object isn't used anywhere by default, but can be #include'd and
+ * used to figure out how much time or CPU cycles small pieces of code
+ * are taking to run.
+ *
  */
 
 #ifndef TIMER_H

@@ -7,6 +7,8 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * TelevisionSDL can display video on the local desktop.
+ *
  */
 
 #ifndef TELEVISION_SDL_H

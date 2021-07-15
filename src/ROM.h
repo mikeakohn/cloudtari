@@ -7,6 +7,10 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * ROM is used to load a catridge ROM file and deal with bank switching
+ * and such. MemoryBus accesses this object if the CPU requests a read
+ * from a memory location with the ROM as a destination address.
+ *
  */
 
 #ifndef ROM_H

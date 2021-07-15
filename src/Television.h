@@ -7,6 +7,11 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * Television is an abstract (pure virtual) class that needs to be
+ * extended by the different ways there are to display the game,
+ * in this case being: Null (nothing), SDL (on screen), VNC (remote
+ * desktop), or Http (webbrowser / GIFs).
+ *
  */
 
 #ifndef TELEVISION_H

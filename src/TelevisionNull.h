@@ -7,6 +7,9 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * TelevisionNull is used for debugging. No display is used but text
+ * of the system's current state can be dumped to the terminal.
+ *
  */
 
 #ifndef TELEVISION_NULL_H

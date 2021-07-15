@@ -7,6 +7,10 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * MemoryBus is used to map memory read/write's to the proper chip/object,
+ * meaning TIA, RIOT, ROM, etc. This object deals with the unfortunate
+ * memory mirroring that happens in the Atari 2600.
+ *
  */
 
 #ifndef MEMORY_BUS_H

@@ -17,12 +17,6 @@
 #include "ColorTable.h"
 #include "TIA.h"
 
-// Atari 2600 has:
-// 262 horizontal lines (37 vertical blank, 192 picture, 30 overscan)
-// Horizontal scanline is: 68 hsync, 160 pixels.
-// Total Resolution: 228x262
-// Visible Resolution: 160x192
-
 TIA::TIA() :
   pos_x{0},
   pos_y{0},

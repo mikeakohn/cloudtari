@@ -7,6 +7,19 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * This is the video chip of the Atari 2600. It has a simple 20 bit playfield
+ * 8 bit player sprites, 2 ball sprites, a missile sprite, and some sound
+ * registers. The joystick firebuttons are mapped here too.
+ *
+ * Video consists of:
+ * 262 horizontal lines (37 + 3 vertical blank, 192 picture, 30 overscan)
+ * Horizontal scanline is: 68 hsync, 160 pixels.
+ * Total Resolution: 228x262
+ * Visible Resolution: 160x192
+ *
+ * For every 1 CPU cycle taken, the TIA will have taken 3 clocks (3 pixels
+ * drawn on the screen).
+ *
  */
 
 #ifndef TIA_H

@@ -7,6 +7,9 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * Network is used to abstract out all the socket() functionality and
+ * is currently used by TelevisionHttp and TelevisionVNC.
+ *
  */
 
 #ifndef NETWORK_H

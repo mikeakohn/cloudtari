@@ -7,6 +7,10 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * GifCompressor can take 8 bit images and a color palette and compress
+ * them into GIF files. This is used by TelevisionHttp for sending to
+ * a webbrowser a stream of GIF images as the video display.
+ *
  */
 
 #ifndef GIF_COMPRESSOR_H

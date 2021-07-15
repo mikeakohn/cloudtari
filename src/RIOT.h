@@ -7,6 +7,9 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * The RIOT chip (MOS 6532) has 128 bytes of RAM (address 0x80 to 0xff),
+ * I/O for the select / reset etc buttons, and a countdown timer.
+ *
  */
 
 #ifndef RIOT_H

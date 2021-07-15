@@ -7,6 +7,10 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * As a part of the debugger, this class will take an opcode and following
+ * data bytes and return a disassembled representation of the instruction
+ * as text.
+ *
  */
 
 #ifndef DISASSEMBLER_H

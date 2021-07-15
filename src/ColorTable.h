@@ -7,6 +7,9 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * This object basically represents the color palette of the Atari 2600.
+ * it's used to convert a 7 bit index to a 32 bit color.
+ *
  */
 
 #ifndef COLOR_TABLE_H

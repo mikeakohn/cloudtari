@@ -10,7 +10,7 @@ spec:
       containers:
       - name: cloudtari
         image: localhost:32000/cloudtari:local
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         command: ["/root/cloudtari", "/root/space_revenge.bin", "vnc", "5900"]
       hostNetwork: true
       restartPolicy: Never

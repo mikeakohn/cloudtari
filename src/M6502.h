@@ -7,6 +7,11 @@
  *
  * Copyright 2021 by Michael Kohn
  *
+ * M6502 emulates the 6502 (6507) of the Atari 2600. It executes instructions
+ * one at a time by calling step() which returns the number of CPU cycles
+ * it took to run that instruction. Every 1 cycle in the CPU should
+ * take 3 cycles in the TIA.
+ *
  */
 
 #ifndef M6502_H
