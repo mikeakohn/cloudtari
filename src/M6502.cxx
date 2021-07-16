@@ -37,7 +37,7 @@ void M6502::reset()
   reg_x = 0;
   reg_y = 0;
 
-  pc = memory_bus->read16(0xfffe);
+  pc = memory_bus->read16(0xfffc);
   sp = 0xff;
   total_cycles = 0;
   total_instructions = 0;

@@ -32,7 +32,7 @@ void RIOT::reset()
 
   riot[SWCHA & 0x07] = 0xff;
   riot[SWACNT & 0x07] = 0xff;
-  riot[SWCHB & 0x07] = 0x03;
+  riot[SWCHB & 0x07] = 0x0b;
 
   prescale = TIM1T;
   prescale_shift = TIM1T_SHIFT;
