@@ -60,13 +60,14 @@ spec:
       - name: cloudtari
         image: localhost:32000/cloudtari:local
         imagePullPolicy: Always
-        command: ["/root/cloudtari", "/root/space_revenge.bin", "http", "PORT"]
+        command: ["/root/cloudtari", "/root/ROM", "http", "PORT"]
       hostNetwork: true
       restartPolicy: Never
 """
 
   yaml = yaml.replace("META", str(port))
   yaml = yaml.replace("PORT", str(port))
+  yaml = yaml.replace("ROM", rom)
 
   #print(yaml)
 
@@ -86,10 +87,6 @@ def get_address(data, port):
   return "problem:0"
 
 # ----------------------------- fold here ---------------------------------
-
-#fp = open("/tmp/shit.txt", "w")
-#fp.write("test\n\n")
-#fp.close()
 
 if len(sys.argv) < 2:
   print("Usage: python start_game.py <romfile>")
