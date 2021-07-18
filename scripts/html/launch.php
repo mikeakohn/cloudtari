@@ -3,6 +3,11 @@
   $address = "";
   $rom = $_GET["rom"];
 
+  // Make sure only 1 PHP script can access the start_game.py script
+  // at one time.
+  $fp = fopen("/tmp/cloudtari_lock.txt", "w");
+  flock($fp, LOCK_EX);
+
   $handle = popen("/usr/bin/sudo -u ubuntu /var/www/html/start_game.py " . $rom, "r");
 
   if (!$handle)
@@ -26,6 +31,9 @@
   }
 
   pclose($handle);
+
+  flock($fp, LOCK_UN);
+  fclose($fp);
 
   if (strpos($address, "problem") !== false)
   {
