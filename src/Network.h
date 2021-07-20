@@ -28,11 +28,11 @@ protected:
   int net_send(const uint8_t *buffer, int len);
   int net_recv(uint8_t *buffer, int len, bool wait_for_full_buffer = true);
   bool net_has_data();
+  bool net_is_connected() { return socket_id != -1; }
 
   int socket_id;
   int client;
   int port;
-
 };
 
 #endif

@@ -51,6 +51,7 @@ private:
   uint8_t *image;
   uint8_t *gif;
   int gif_length;
+  int no_data_count;
   GifCompressor *gif_compressor;
   char query_string[128];
   char filename[128];

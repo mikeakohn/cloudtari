@@ -17,7 +17,7 @@
 #include "ColorTable.h"
 #include "TelevisionHttp.h"
 
-TelevisionHttp::TelevisionHttp() : gif{nullptr}, gif_length{0}
+TelevisionHttp::TelevisionHttp() : gif{nullptr}, gif_length{0}, no_data_count{0}
 {
   gif_compressor = new GifCompressor();
   gif_compressor->set_width(width);
@@ -128,7 +128,18 @@ int TelevisionHttp::handle_events()
 
     filename[0] = 0;
     query_string[0] = 0;
+    no_data_count = 0;
   }
+    else
+  {
+    no_data_count++;
+
+    // If there aren't any web requests for a while, assume the connection
+    // is broken.
+    if (no_data_count == 30 * 60) { return KEY_QUIT; }
+  }
+
+  if (!net_is_connected()) { return KEY_QUIT; }
 
   if (!key_queue.is_empty())
   {
