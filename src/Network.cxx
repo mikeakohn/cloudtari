@@ -77,9 +77,17 @@ int Network::net_open(int port)
 
 void Network::net_close()
 {
-  if (socket_id == -1) { return; }
-  close(socket_id);
-  socket_id = -1;
+  if (client != -1)
+  {
+    close(client);
+    client = -1;
+  }
+
+  if (socket_id != -1)
+  {
+    close(socket_id);
+    socket_id = -1;
+  }
 }
 
 int Network::net_send(const uint8_t *buffer, int length)
@@ -183,7 +191,7 @@ bool Network::net_has_data()
   {
     if (errno == EINTR) { return false; }
 
-    perror("Problem with select in vnc_recv");
+    perror("Problem with select in Network");
     net_close();
     return false;
   }
