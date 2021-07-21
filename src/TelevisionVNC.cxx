@@ -371,7 +371,7 @@ int TelevisionVNC::send_color_table()
 
 int TelevisionVNC::send_image_full()
 {
-  if (needs_color_table) { return 0; }
+  //if (needs_color_table) { return 0; }
 
   if (net_send((const uint8_t *)image_packet[image_page], image_packet_length) != image_packet_length)
   {
