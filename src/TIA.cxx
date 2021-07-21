@@ -89,8 +89,16 @@ void TIA::write_memory(int address, uint8_t value)
     case VBLANK:
       break;
     case WSYNC:
-      //write_regs[WSYNC] = 1;
-      hsync_latch = true;
+      // This one pauses the CPU until the "video beam" starts back over
+      // at 0. This is usually done by an "sta WSYNC" instruction which is
+      // 2 CPU cycles (6 TIA cycles). The issue it seems like the CPU should
+      // be halted after the instruction finishes (hence hsync_latch variable
+      // which will pause it after the TIA runs the 6 pixel clocks). If it's
+      // halted here and between those 6 cycles in the TIA it resets to 0
+      // it seems like the CPU could unhalt early. However, with the latch
+      // code it seems to cause video glitches, so it's commented out for now.
+      write_regs[WSYNC] = 1;
+      //hsync_latch = true;
       break;
     case RSYNC:
       // "This address resets the horizontal sync counter to define the
@@ -214,19 +222,19 @@ void TIA::write_memory(int address, uint8_t value)
       }
       break;
     case HMP0:
-      player_0.set_offset(compute_offset(value));
+      player_0.set_move(compute_offset(value));
       break;
     case HMP1:
-      player_1.set_offset(compute_offset(value));
+      player_1.set_move(compute_offset(value));
       break;
     case HMM0:
-      missile_0.set_offset(compute_offset(value));
+      missile_0.set_move(compute_offset(value));
       break;
     case HMM1:
-      missile_1.set_offset(compute_offset(value));
+      missile_1.set_move(compute_offset(value));
       break;
     case HMBL:
-      ball.set_offset(compute_offset(value));
+      ball.set_move(compute_offset(value));
       break;
     case VDELP0:
       player_0.vertical_delay = value & 1;
@@ -237,20 +245,29 @@ void TIA::write_memory(int address, uint8_t value)
     case VDELBL:
       ball.vertical_delay = value & 1;
       break;
+    case RESMP0:
+      missile_0.start_pos = player_0.start_pos;
+      break;
+    case RESMP1:
+      missile_1.start_pos = player_1.start_pos;
+      break;
     case HMOVE:
-      player_0.apply_offset();
-      player_1.apply_offset();
-      missile_0.apply_offset();
-      missile_1.apply_offset();
-      ball.apply_offset();
+      // Strobing HMOVE will subtract the "move" values set by the HMP0, etc
+      // registers. If HMOVE is called again, the same values are subtracted
+      // again.
+      player_0.apply_move();
+      player_1.apply_move();
+      missile_0.apply_move();
+      missile_1.apply_move();
+      ball.apply_move();
       break;
     case HMCLR:
       // Clear motion registers.
-      player_0.clear_offset();
-      player_1.clear_offset();
-      missile_0.clear_offset();
-      missile_1.clear_offset();
-      ball.clear_offset();
+      player_0.clear_move();
+      player_1.clear_move();
+      missile_0.clear_move();
+      missile_1.clear_move();
+      ball.clear_move();
       break;
     case CXCLR:
       // Clear collision latches.
@@ -357,20 +374,18 @@ void TIA::dump()
   {
     printf("%c", (player_0.data & (1 << n)) != 0 ? '*' : '.');
   }
-  printf(" x=%d offset=%d (next=%d)\n",
+  printf(" x=%d (move=%d)\n",
     player_0.start_pos,
-    player_0.offset,
-    player_0.next_offset);
+    player_0.move);
 
   printf("player_1: ");
   for (int n = 0; n < 8; n++)
   {
     printf("%c", (player_1.data & (1 << n)) != 0 ? '*' : '.');
   }
-  printf(" x=%d offset=%d (next=%d)\n",
+  printf(" x=%d (move=%d)\n",
     player_1.start_pos,
-    player_1.offset,
-    player_1.next_offset);
+    player_1.move);
 }
 
 void TIA::player_size(Player &player, int value)

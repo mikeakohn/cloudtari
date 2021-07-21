@@ -20,6 +20,8 @@ blah:
   inx
   rts
 
+.org 0xfffc
+  .dw start
 .org 0xfffe
   .dw start
 

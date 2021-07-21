@@ -114,8 +114,7 @@ private:
       need_update{false},
       scale{1},
       start_pos{0},
-      offset{0},
-      next_offset{0}
+      move{0}
     {
     }
 
@@ -123,17 +122,17 @@ private:
     void set_position() { set_pos = true; }
     void set_position(int pos_x) { start_pos = pos_x; set_pos = false; }
     void set_scale(int value) { scale = value; }
-    void set_offset(int value) { next_offset = value; }
-    void apply_offset() { offset = next_offset; }
-    void clear_offset() { offset = 0; next_offset = 0; }
+    void set_move(int value) { move = value; }
+    void apply_move() { start_pos -= move; }
+    void clear_move() { move = 0; }
     bool need_set_position() { return set_pos; }
     bool is_pixel_on() { return pixel_value; }
 
     void compute_pixel(int pos_x)
     {
       //if (pos_x < 68) { return false; }
-      if (pos_x < start_pos - offset) { pixel_value = false; return; }
-      int x = (pos_x - (start_pos - offset)) / scale;
+      if (pos_x < start_pos) { pixel_value = false; return; }
+      int x = (pos_x - start_pos) / scale;
       if (x > 7) { pixel_value = false; return; }
       pixel_value = (data & (1 << x)) != 0;
     }
@@ -143,7 +142,7 @@ private:
     bool vertical_delay;
     bool need_update;
     bool pixel_value;
-    int scale, start_pos, offset, next_offset;
+    int scale, start_pos, move;
   };
 
   struct Sprite
@@ -152,8 +151,7 @@ private:
       width{1},
       set_pos{false},
       enabled{false},
-      start_pos{0},
-      offset{0}
+      start_pos{0}
     {
     }
 
@@ -161,9 +159,9 @@ private:
     void set_position() { set_pos = true; }
     void set_position(int pos_x) { start_pos = pos_x; set_pos = false; }
     void set_width(int value) { width = value; }
-    void set_offset(int value) { next_offset = value; }
-    void apply_offset() { offset = next_offset; }
-    void clear_offset() { offset = 0; next_offset = 0; }
+    void set_move(int value) { move = value; }
+    void apply_move() { start_pos -= move; }
+    void clear_move() { move = 0; }
     void set_enabled(bool value) { enabled = value; }
     bool need_set_position() { return set_pos; }
     bool is_pixel_on() { return pixel_value; }
@@ -172,7 +170,7 @@ private:
     {
       if (!enabled) { pixel_value = false; return; }
       //if (pos_x < 68) { return false; }
-      int x = start_pos - offset;
+      int x = start_pos;
       pixel_value = pos_x >= x && pos_x < x + width;
     }
 
@@ -180,7 +178,7 @@ private:
     bool set_pos;
     bool enabled;
     bool pixel_value;
-    int start_pos, offset, next_offset;
+    int start_pos, move;
   };
 
   struct Missile : public Sprite
