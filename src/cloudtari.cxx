@@ -19,7 +19,9 @@
 #include "ROM.h"
 #include "TelevisionHttp.h"
 #include "TelevisionNull.h"
+#ifdef USE_SDL
 #include "TelevisionSDL.h"
+#endif
 #include "TelevisionVNC.h"
 #include "TIA.h"
 
@@ -40,7 +42,9 @@ int main(int argc, char *argv[])
     printf(
       "Usage: %s <gamefile.bin> <null/sdl/vnc/debug/break/timer/step>\n"
       "          null\n"
+#ifdef USE_SDL
       "          sdl\n"
+#endif
       "          vnc <port>\n"
       "          http <port>\n"
       "          debug\n"
@@ -62,11 +66,13 @@ int main(int argc, char *argv[])
   m6502->set_memory_bus(memory_bus);
   m6502->reset();
 
+#ifdef USE_SDL
   if (strcmp(argv[2], "sdl") == 0)
   {
     television = new TelevisionSDL();
   }
     else
+#endif
   if (strcmp(argv[2], "vnc") == 0)
   {
     television = new TelevisionVNC();
@@ -133,7 +139,7 @@ int main(int argc, char *argv[])
   }
     else
   {
-    printf("Unknown mode %s\n", argv[1]);
+    printf("Unknown mode %s\n", argv[2]);
     exit(1);
   }
 

@@ -2,6 +2,9 @@
 default:
 	@+make -C build
 
+nosdl:
+	@+make -C build nosdl
+
 testing:
 	naken_asm -b -l -o test_1.bin test/test_1.asm
 

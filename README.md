@@ -14,3 +14,15 @@ For more information including a video:
 
 https://www.mikekohn.net/software/cloudtari.php
 
+Building
+========
+
+To build with SDL (requires libsdl2 installed) type:
+
+    sudo apt install libsdl2-dev
+    make
+
+To build without SDL (needed for Docker / Kubernetes):
+
+    make nosdl
+

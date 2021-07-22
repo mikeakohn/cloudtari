@@ -21,10 +21,14 @@ OBJECTS= \
   Television.o \
   TelevisionHttp.o \
   TelevisionNull.o \
-  TelevisionSDL.o \
   TelevisionVNC.o
 
-default: $(OBJECTS)
+default: $(OBJECTS) TelevisionSDL.o
+	$(CXX) -o ../cloudtari ../src/cloudtari.cxx \
+	  $(OBJECTS) TelevisionSDL.o \
+	  $(CFLAGS) $(LDFLAGS) -DUSE_SDL
+
+nosdl: $(OBJECTS)
 	$(CXX) -o ../cloudtari ../src/cloudtari.cxx \
 	  $(OBJECTS) \
 	  $(CFLAGS) $(LDFLAGS)
