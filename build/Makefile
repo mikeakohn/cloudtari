@@ -31,7 +31,7 @@ default: $(OBJECTS) TelevisionSDL.o
 nosdl: $(OBJECTS)
 	$(CXX) -o ../cloudtari ../src/cloudtari.cxx \
 	  $(OBJECTS) \
-	  $(CFLAGS) $(LDFLAGS)
+	  $(CFLAGS)
 
 %.o: %.cxx %.h
 	$(CXX) -c $< -o $*.o \

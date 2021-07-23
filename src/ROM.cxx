@@ -34,11 +34,13 @@ int ROM::load(const char *filename)
   memset(&statbuf, 0, sizeof(statbuf));
   stat(filename, &statbuf);
 
-  if (statbuf.st_size != 2048 &&
-      statbuf.st_size != 4096 &&
-      statbuf.st_size != 8192)
+  const int file_size = statbuf.st_size;
+
+  if (file_size != 2048 &&
+      file_size != 4096 &&
+      file_size != 8192)
   {
-    printf("Error: ROM size is not 2048, 4096, 8192 (%ld)\n", statbuf.st_size);
+    printf("Error: ROM size is not 2048, 4096, 8192 (%d)\n", file_size);
     return -1;
   }
 
@@ -55,7 +57,7 @@ int ROM::load(const char *filename)
 
   if (size != statbuf.st_size)
   {
-    printf("Error: Could not load ROM %d/%ld\n", size, statbuf.st_size);
+    printf("Error: Could not load ROM %d/%d\n", size, file_size);
     return -2;
   }
 
